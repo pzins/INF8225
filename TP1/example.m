@@ -89,3 +89,9 @@ CPDj{D} = tabularCpdCreate(reshape([0.95 0.7 0.05 0.03], 2, 2));
 % return vector with only at position G the value '2eme argument', 
 % the rest is only 0
 % 5 is the length of the vector
+
+% remplissage des proba
+% mettre combi des trucs sachant que (00 01 10 11) sur les lignes et mettre
+% proba  aux colonnes P(X=0) P(X=1)
+% ensuite pr remplir le tableau prendre premiere colonnes puis ajouté
+% seconde colonne

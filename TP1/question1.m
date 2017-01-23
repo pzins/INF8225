@@ -28,7 +28,7 @@ CPDj{D} = tabularCpdCreate(reshape([0.7 0.35 0.3 0.65], 2, 2));
 
 dgm = dgmCreate(dgm, CPDj, 'nodenames', names, 'infEngine', 'jtree');
 joint = dgmInferQuery(dgm, [P S C X D]);
-
+break
 
 % Explaining away
 fprintf('\n\n*******************************************************************************************************************************************************************************\n')
