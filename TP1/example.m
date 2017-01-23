@@ -77,3 +77,9 @@ CPDj{D} = tabularCpdCreate(reshape([0.95 0.7 0.05 0.03], 2, 2));
 
 
 % printed result = 0.257143
+
+
+% on peut utiliser tabularFactorCondition(joint, X, clamped) qui utilise le
+% force brute
+% ou utiliser dgmInferQuery(dgm, X, 'clamped', clamped)
+% normalement les resultats sont les mêmes

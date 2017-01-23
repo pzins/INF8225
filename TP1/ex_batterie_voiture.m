@@ -71,7 +71,7 @@ FT_Sachant_D = tabularFactorCondition(joint, FT, clampled);
 fprintf('FT Sachant !D: p(FT|D=0)=%f\n',FT_Sachant_D.T(1));
 
 clampled = sparsevec(D,2,5);
-FT_Sachant_D = tabularFactorCondition(joint, FT, clampled);
+FT_Sachant_D = tabularFactorCondition(joint, FT, clampled); 
 fprintf('FT Sachant  D: p(FT|D=1)=%f\n',FT_Sachant_D.T(1));
 fprintf('On voit que D influence FT\n\n');
 
