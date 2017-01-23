@@ -31,7 +31,7 @@ joint = dgmInferQuery(dgm, [P S C X D]);
 
 
 % Explaining away
-fprintf('\n\n*********************************************************************\n')
+fprintf('\n\n*******************************************************************************************************************************************************************************\n')
 disp('Explaining Away');
 
 % P(S=1|P=0)
@@ -57,9 +57,11 @@ disp('Maintenant, supposons que l''on observe C')
 disp('Dans ce cas, si l''on a une information sur P, la probabilite de S va changer')
 % si l'information est : P est vrai
 disp('Si l''information est : P est vrai')
+% P(S=1|C=1 P=1)
 clamped = sparsevec([P C],[2],5);
 pS_sachant_P_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1 P=1) = %f\n', pS_sachant_P_C.T(2))
+% P(S=1|C=1)
 clamped = sparsevec([C],2,5);
 pS_sachant_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
@@ -67,16 +69,19 @@ disp('On remarque bien que la probabilite P(S=1|C=1 P=1) a baissé par rapport à 
 
 % De même si l'information est : P est faux
 disp('De meme si l''information est : P est faux')
+% P(S=1|C=1 P=0 )
 clamped = sparsevec([P C],[1 2],5);
 pS_sachant_C_nP = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1 P=0) = %f\n', pS_sachant_C_nP.T(2))
+% P(S=1|C=1)
 clamped = sparsevec([C],2,5);
 pS_sachant_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
 disp('Cette fois, on remarque bien que la probabilite P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
+disp('*******************************************************************************************************************************************************************************')
 
 
-fprintf('\n\n*********************************************************************\n')
+fprintf('\n\n*******************************************************************************************************************************************************************************\n')
 fprintf('Serial Block\n');
 % Au depart, S, C et X sont dépendants : 
 disp('Au depart, S, C et X sont dépendants :');
@@ -111,12 +116,12 @@ fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(1))
 % Les 3 probabiltés sont égales, X et S sont donc bien indépendants
 % conditionnellement à C
 disp('Les 3 probabilités sont égales, X et S sont donc bien indépendants conditionnellement à C')
-disp('*********************************************************************')
+disp('*******************************************************************************************************************************************************************************')
 
 
 
 
-fprintf('\n\n*********************************************************************\n')
+fprintf('\n\n*******************************************************************************************************************************************************************************\n')
 fprintf('Divergent blocking\n');
 % Au depart, C, D et X sont dépendants : 
 disp('Au depart, C, D et X sont dépendants :');
@@ -152,4 +157,4 @@ clamped = sparsevec([C], 2, 5);
 X_sachant_C = tabularFactorCondition(joint, X, clamped);
 fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(2));
 disp('Les 3 probabilités sont égales, X et D sont donc bien indépendants conditionnellement à C')
-disp('*********************************************************************')
+disp('*******************************************************************************************************************************************************************************')
