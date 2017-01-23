@@ -31,6 +31,7 @@ joint = dgmInferQuery(dgm, [P S C X D]);
 
 
 % Explaining away
+fprintf('\n\n*********************************************************************\n')
 disp('Explaining Away');
 
 % P(S=1|P=0)
@@ -74,47 +75,81 @@ pS_sachant_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
 disp('Cette fois, on remarque bien que la probabilite P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
 
-break
+
+fprintf('\n\n*********************************************************************\n')
+fprintf('Serial Block\n');
+% Au depart, S, C et X sont dépendants : 
+disp('Au depart, S, C et X sont dépendants :');
+% P(X=1|S=0)
+clamped = sparsevec(S,1,5);
+pX_sachant_nS = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|S=0) = %f\n', pX_sachant_nS.T(2))
+% P(X=1|S=1)
+clamped = sparsevec(S,2,5);
+pX_sachant_S = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|S=1) = %f\n', pX_sachant_S.T(2))
+% P(X=1)
+pX = tabularFactorCondition(joint, X);
+fprintf('P(X=1) = %f\n', pX.T(2));
+disp('Les trois probabilités ne sont pas égales, on remarque donc bien que S, C et X ne sont pas indépendants');
+
+% Maintenant, C est observé et ainsi le phénomène serial blocking va rendre
+% S et X indépendants
+disp('% Maintenant, C est observé et ainsi le phénomène serial blocking va rendre S et X indépendants');
+% P(X=1|C=1 S=0)
+clamped = sparsevec([C S],[2 1],5);
+X_sachant_C_nS = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1 S=0) = %f\n', X_sachant_C_nS.T(1))
+% P(X=1|C=1 S=1)
+clamped = sparsevec([C S],[2 2],5);
+X_sachant_C_S = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1 S=1) = %f\n', X_sachant_C_S.T(1))
+% P(X=1|C=1)
+clamped = sparsevec([C],2,5);
+X_sachant_C = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(1))
+% Les 3 probabiltés sont égales, X et S sont donc bien indépendants
+% conditionnellement à C
+disp('Les 3 probabilités sont égales, X et S sont donc bien indépendants conditionnellement à C')
+disp('*********************************************************************')
 
 
-fprintf('\n\n Serial Block\n');
-% P(X=1|S=0 C=1)
-clamped = sparsevec([S C],[1 2],5);
-X_sachant_S_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|S=0 C=1) = %f\n', X_sachant_S_C.T(1))
-% P(X=1|S=1 C=1)
-clamped = sparsevec([S C],[2 2],5);
-X_sachant_S_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|S=1 C=1) = %f\n', X_sachant_S_C.T(1))
-disp('On remarque donc que une information sur C (Cancer) rend S (smoker) et X (Xray) independants')
 
 
-fprintf('\n\n Divergent blocking\n');
+fprintf('\n\n*********************************************************************\n')
+fprintf('Divergent blocking\n');
+% Au depart, C, D et X sont dépendants : 
+disp('Au depart, C, D et X sont dépendants :');
 % P(X=1|D=0)
-clamped = sparsevec([D], [1], 5);
-X_sachant_D = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|D=0) = %f\n', X_sachant_D.T(1));
-
+clamped = sparsevec(D,1,5);
+pX_sachant_nD = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|D=0) = %f\n', pX_sachant_nD.T(2))
 % P(X=1|D=1)
-clamped = sparsevec([D], [2], 5);
-X_sachant_D = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|D=1) = %f\n', X_sachant_D.T(1));
-disp('On remarque bien que X (Xray) et D (Dispnea) sont dépendants : P(X=1|D=0) != P(X=1|D=0) != P(X=1)');
-disp('Si ils étaient independants : P(X=1|D=0) = P(X=1|D=1) = P(X=1)');
+clamped = sparsevec(D,2,5);
+pX_sachant_D = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|D=1) = %f\n', pX_sachant_D.T(2))
+% P(X=1)
+pX = tabularFactorCondition(joint, X);
+fprintf('P(X=1) = %f\n', pX.T(2));
+disp('Les trois probabilités ne sont pas égales, on remarque donc bien que C, D et X ne sont pas indépendants');
 
-disp('\n Maintenant en observant C (Cancer)')
-% P(X=1|D=0 C=1)
-clamped = sparsevec([D C], [1 2], 5);
-X_sachant_D_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|D=0 C=1) = %f\n', X_sachant_D_C.T(1));
+% Maintenant, C est observé et ainsi le phénomène divergent blocking va rendre
+% D et X indépendants
+disp('% Maintenant, C est observé et ainsi le phénomène divergent blocking va rendre D et X indépendants');
 
-% P(X=1|D=1 c=1)
-clamped = sparsevec([D C], [2 2], 5);
-X_sachant_D_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|D=1 C=1) = %f\n', X_sachant_D_C.T(1));
-disp('Dans ce cas, X(Xray) et D (Dispnea) sont bien indepenants puisque : ')
-disp('P(X=1|D=0 C=1) = P(X=1|D=1 C=1) = P(X=1)')
+% P(X=1|C=1 D=0)
+clamped = sparsevec([C D], [2 1], 5);
+X_sachant_C_nD = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1 D=0) = %f\n', X_sachant_C_nD.T(2));
 
-clamped = sparsevec(C, 2, 5);
-X_sachant_C = tabularFactorCondition(joint,  X);
-fprintf('P(X=1|C=1) = %f\n',X_sachant_C .T(1))
+% P(X=1|C=1 D=1)
+clamped = sparsevec([C D], [2 2], 5);
+X_sachant_C_D = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1 D=1) = %f\n', X_sachant_C_D.T(2));
+
+% P(X=1|C=1)
+clamped = sparsevec([C], 2, 5);
+X_sachant_C = tabularFactorCondition(joint, X, clamped);
+fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(2));
+disp('Les 3 probabilités sont égales, X et D sont donc bien indépendants conditionnellement à C')
+disp('*********************************************************************')
