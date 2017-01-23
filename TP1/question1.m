@@ -29,35 +29,53 @@ CPDj{D} = tabularCpdCreate(reshape([0.7 0.35 0.3 0.65], 2, 2));
 dgm = dgmCreate(dgm, CPDj, 'nodenames', names, 'infEngine', 'jtree');
 joint = dgmInferQuery(dgm, [P S C X D]);
 
-% sparsevec
-% return vector with only at position G the value '2eme argument', 
-% the rest is only 0
-% 5 is the length of the vector
 
 % Explaining away
 disp('Explaining Away');
 
-% P(S=1|P=1)
-clamped = sparsevec(P,2,5);
-S_sachant_P = tabularFactorCondition(joint, S, clamped);
-fprintf('P(S=1|P=1) = %f\n', S_sachant_P.T(2))
-
 % P(S=1|P=0)
 clamped = sparsevec(P,1,5);
-S_sachant_P = tabularFactorCondition(joint, S, clamped);
-fprintf('P(S=1|P=0) = %f\n', S_sachant_P.T(2))
-disp('De plus P(S=1)=0.3')
-disp('On remarque bien que P (pollution) et S (smoker) sont independants quand nous avons aucune information sur C (cancer)');
+pS_sachant_nP = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|P=0) = %f\n', pS_sachant_nP.T(2))
 
-% Maintenant avec une information sur C
-disp('Maintenant avec une information sur C')
+% P(S=1|P=1)
+clamped = sparsevec(P,2,5);
+pS_sachant_P = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|P=1) = %f\n', pS_sachant_P.T(2))
 
-% P(S=1|P=0 C=0)
-clamped = sparsevec([P C],1,5);
-S_sachant_P_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(S=1|P=1 C=1) = %f\n', S_sachant_P_C.T(1))
-disp('En ayant une information sur C (Cancer, on remarque que si on a un indice')
-disp('sur P (Pollution) qui se realise alors S (smoker) voit sa probabilité chuter')
+% P(S=1)
+pS = tabularFactorCondition(joint, S);
+fprintf('P(S=1) = %f\n', pS.T(2));
+disp('On remarque bien que P (pollution) et S (smoker) sont independants quand nous n''avons aucune information sur C (cancer)');
+
+% Maintenant, supposons que l'on observe C
+disp('Maintenant, supposons que l''on observe C')
+
+% Dans ce cas, si l'on a une information sur P, la probabilité de S va
+% changer
+disp('Dans ce cas, si l''on a une information sur P, la probabilite de S va changer')
+% si l'information est : P est vrai
+disp('Si l''information est : P est vrai')
+clamped = sparsevec([P C],[2],5);
+pS_sachant_P_C = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|C=1 P=1) = %f\n', pS_sachant_P_C.T(2))
+clamped = sparsevec([C],2,5);
+pS_sachant_C = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
+disp('On remarque bien que la probabilite P(S=1|C=1 P=1) a baissé par rapport à P(S=1|C=1) puisque le fait que C soit vrai est déjà expliqué par le fait que P soit vrai');
+
+% De même si l'information est : P est faux
+disp('De meme si l''information est : P est faux')
+clamped = sparsevec([P C],[1 2],5);
+pS_sachant_C_nP = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|C=1 P=0) = %f\n', pS_sachant_C_nP.T(2))
+clamped = sparsevec([C],2,5);
+pS_sachant_C = tabularFactorCondition(joint, S, clamped);
+fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
+disp('Cette fois, on remarque bien que la probabilite P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
+
+break
+
 
 fprintf('\n\n Serial Block\n');
 % P(X=1|S=0 C=1)

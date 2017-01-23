@@ -83,3 +83,9 @@ CPDj{D} = tabularCpdCreate(reshape([0.95 0.7 0.05 0.03], 2, 2));
 % force brute
 % ou utiliser dgmInferQuery(dgm, X, 'clamped', clamped)
 % normalement les resultats sont les mêmes
+
+
+% sparsevec
+% return vector with only at position G the value '2eme argument', 
+% the rest is only 0
+% 5 is the length of the vector
