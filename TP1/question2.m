@@ -22,7 +22,7 @@ dgm(A,[M,J]) = 1;
 % probabilties
 CPDj{C} = tabularCpdCreate(reshape([0.999 0.001], 2, 1));
 CPDj{T} = tabularCpdCreate(reshape([0.998 0.002], 2, 1));
-CPDj{A} = tabularCpdCreate(reshape([0.999 0.71 0.60 0.05 0.001 0.29 0.94 0.95], 2, 2, 2));
+CPDj{A} = tabularCpdCreate(reshape([0.999 0.06 0.71 0.05 0.001 0.94 0.29 0.95], 2, 2, 2));
 CPDj{M} = tabularCpdCreate(reshape([0.95 0.1 0.05 0.9], 2,2));
 CPDj{J} = tabularCpdCreate(reshape([0.99 0.3 0.01 0.7], 2, 2));
 

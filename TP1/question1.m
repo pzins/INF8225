@@ -28,7 +28,7 @@ CPDj{D} = tabularCpdCreate(reshape([0.7 0.35 0.3 0.65], 2, 2));
 
 dgm = dgmCreate(dgm, CPDj, 'nodenames', names, 'infEngine', 'jtree');
 joint = dgmInferQuery(dgm, [P S C X D]);
-break
+
 
 % Explaining away
 fprintf('\n\n*******************************************************************************************************************************************************************************\n')
@@ -79,6 +79,8 @@ pS_sachant_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
 disp('Cette fois, on remarque bien que la probabilite P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
 disp('*******************************************************************************************************************************************************************************')
+
+
 
 
 fprintf('\n\n*******************************************************************************************************************************************************************************\n')
