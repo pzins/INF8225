@@ -4,6 +4,13 @@ fprintf('   \\   /\n');
 fprintf('    [A]\n');
 fprintf('   /   \\\n');
 fprintf(' [M]   [J]\n');
+fprintf('Reseau bayesien\n\n')
+fprintf('C: cambriolage\n')
+fprintf('T : tremblement\n')
+fprintf('A : alarme\n')
+fprintf('M : marie appelle\n')
+fprintf('J : jean appelle\n\n\n')
+
 C = 1; T = 2; A = 3; M = 4; J = 5;
 
 % noeuds du reseau bayesien
@@ -30,14 +37,15 @@ dgm = dgmCreate(dgm, CPDj, 'nodenames', names, 'infEngine', 'jtree');
 joint = dgmInferQuery(dgm, [C T A M J]);
 
 % affichage de l'histogramme de la probabilité jointe du réseau
-lab = cellfun(@(x) {sprintf('%d ',x)}, num2cell(ind2subv([2 2 2 2],1:16),2));
+lab = cellfun(@(x) {sprintf('%d ',x)}, num2cell(ind2subv([2 2 2 2 2],1:32),2));
 figure;
 bar(joint.T(:))
-set(gca,'xtick',1:16);
+set(gca,'xtick',1:32);
 xticklabelRot(lab, 90, 10, 0.01)
 title('joint distribution of alarm')
 
 % calculs
+
 % P(C=1|M=1 J=0)
 clamped = sparsevec([M J], [2 1], 5);
 pC_sachant_M_nJ = tabularFactorCondition(joint, C, clamped);
