@@ -51,10 +51,8 @@ class Function(Node):
 		
 		# extract all variables from the function (x1, x2, ...)
 		tmp=proba
-		# we remove some character
-		for i in ["P","(",")",","," ","|"]:
-			tmp = tmp.replace(i, "")
-		self.proba_args = re.findall('..', tmp)
+		tmp = tmp.replace('P',' ')
+		self.proba_args = re.findall(r'\w+', tmp)
 
 
 
@@ -71,8 +69,8 @@ class Function(Node):
 				if len(self.proba_args)>1:
 					somme_str = "SOMME_"
 					for j in self.proba_args:
-						# no sum over the current variable
-						if j != caller:
+						# no sum over the current variable and observed variables
+						if j != caller and not j in [k.name for k in observed]:
 							somme_str += "_"+j
 				st += somme_str + " " + self.proba + " " + i.getMessage(self.name, observed)
 		return st
@@ -108,4 +106,4 @@ fc.addNeighbours([x1, x3])
 x3.addNeighbours([fc])
 
 # compute probability
-print(getProbability(x2, []))
+print(getProbability(x3, [x4]))
