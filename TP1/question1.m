@@ -22,7 +22,6 @@ dgm(C,[X,D]) = 1;
 % probabilties
 CPDj{P} = tabularCpdCreate(reshape([0.9 0.1], 2, 1));
 CPDj{S} = tabularCpdCreate(reshape([0.7 0.3], 2, 1));
-% CPDj{C} = tabularCpdCreate(reshape([0.001 0.02 0.03 0.05 0.999 0.98 0.97 0.95], 2, 2, 2));
 CPDj{C} = tabularCpdCreate(reshape([0.999 0.98 0.97 0.95 0.001 0.02 0.03 0.05],2 ,2 ,2));
 CPDj{X} = tabularCpdCreate(reshape([0.8 0.1 0.2 0.9], 2,2));
 CPDj{D} = tabularCpdCreate(reshape([0.7 0.35 0.3 0.65], 2, 2));
@@ -107,15 +106,15 @@ disp('% Maintenant, C est observé et ainsi le phénomène serial blocking va rendr
 % P(X=1|C=1 S=0)
 clamped = sparsevec([C S],[2 1],5);
 X_sachant_C_nS = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|C=1 S=0) = %f\n', X_sachant_C_nS.T(1))
+fprintf('P(X=1|C=1 S=0) = %f\n', X_sachant_C_nS.T(2))
 % P(X=1|C=1 S=1)
 clamped = sparsevec([C S],[2 2],5);
 X_sachant_C_S = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|C=1 S=1) = %f\n', X_sachant_C_S.T(1))
+fprintf('P(X=1|C=1 S=1) = %f\n', X_sachant_C_S.T(2))
 % P(X=1|C=1)
 clamped = sparsevec([C],2,5);
 X_sachant_C = tabularFactorCondition(joint, X, clamped);
-fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(1))
+fprintf('P(X=1|C=1) = %f\n', X_sachant_C.T(2))
 % Les 3 probabiltés sont égales, X et S sont donc bien indépendants
 % conditionnellement à C
 disp('Les 3 probabilités sont égales, X et S sont donc bien indépendants conditionnellement à C')
