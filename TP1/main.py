@@ -15,7 +15,6 @@ class Node:
 		self.neighbours.sort(key = lambda x: len(x.neighbours))
 
 
-
 	def __str__(self):
 		print(self.name)
 		n = ""
@@ -81,10 +80,7 @@ class Function(Node):
 def getProbability(node, observed):
 	# we specify this node as the root 
 	node.root = True
-	res = ""
-	for i in node.neighbours:
-		res += "[" + node.getMessage(node.name, observed) + "] "
-	return res
+	return node.getMessage(node.name, observed)
 
 # declaration of the factor graph
 fa = Function("fa", "P(x1)")
@@ -112,4 +108,4 @@ fc.addNeighbours([x1, x3])
 x3.addNeighbours([fc])
 
 # compute probability
-print(getProbability(x3, [x4]))
+print(getProbability(x2, []))
