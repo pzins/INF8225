@@ -4,6 +4,12 @@ fprintf('   \\   /\n');
 fprintf('    [C]\n');
 fprintf('   /   \\\n');
 fprintf(' [X]   [D]\n');
+fprintf('Reseau bayesien\n\n')
+fprintf('P : pollution (too high)\n')
+fprintf('S : smoker\n')
+fprintf('C : cancer\n')
+fprintf('X : xray\n')
+fprintf('D : dispnea\n')
 P = 1; S = 2; C = 3; X = 4; D = 5;
 
 % noeuds du reseau bayesien
@@ -47,7 +53,7 @@ fprintf('P(S=1|P=1) = %f\n', pS_sachant_P.T(2))
 % P(S=1)
 pS = tabularFactorCondition(joint, S);
 fprintf('P(S=1) = %f\n', pS.T(2));
-disp('On remarque bien que P (pollution) et S (smoker) sont independants quand nous n''avons aucune information sur C (cancer)');
+disp('On remarque bien que P (pollution) et S (smoker) sont indépendants quand nous n''avons aucune information sur C (cancer)');
 
 % Maintenant, supposons que l'on observe C
 disp('Maintenant, supposons que l''on observe C')
@@ -68,7 +74,7 @@ fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
 disp('On remarque bien que la probabilite P(S=1|C=1 P=1) a baissé par rapport à P(S=1|C=1) puisque le fait que C soit vrai est déjà expliqué par le fait que P soit vrai');
 
 % De même si l'information est : P est faux
-disp('De meme si l''information est : P est faux')
+disp('De même si l''information est : P est faux')
 % P(S=1|C=1 P=0 )
 clamped = sparsevec([P C],[1 2],5);
 pS_sachant_C_nP = tabularFactorCondition(joint, S, clamped);
@@ -77,7 +83,7 @@ fprintf('P(S=1|C=1 P=0) = %f\n', pS_sachant_C_nP.T(2))
 clamped = sparsevec([C],2,5);
 pS_sachant_C = tabularFactorCondition(joint, S, clamped);
 fprintf('P(S=1|C=1) = %f\n', pS_sachant_C.T(2))
-disp('Cette fois, on remarque bien que la probabilite P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
+disp('Cette fois, on remarque bien que la probabiliée P(S=1|C=1 P=0) a augmenté par rapport à P(S=1|C=1) puisque le fait que C soit vrai devrait être expliqué par S puisque P est faux');
 disp('*******************************************************************************************************************************************************************************')
 
 
@@ -86,7 +92,7 @@ disp('**************************************************************************
 fprintf('\n\n*******************************************************************************************************************************************************************************\n')
 fprintf('Serial Block\n');
 % Au depart, S, C et X sont dépendants : 
-disp('Au depart, S, C et X sont dépendants :');
+disp('Au départ, S, C et X sont dépendants :');
 % P(X=1|S=0)
 clamped = sparsevec(S,1,5);
 pX_sachant_nS = tabularFactorCondition(joint, X, clamped);
@@ -102,7 +108,7 @@ disp('Les trois probabilités ne sont pas égales, on remarque donc bien que S, C 
 
 % Maintenant, C est observé et ainsi le phénomène serial blocking va rendre
 % S et X indépendants
-disp('% Maintenant, C est observé et ainsi le phénomène serial blocking va rendre S et X indépendants');
+disp('Maintenant, C est observé et ainsi le phénomène serial blocking va rendre S et X indépendants');
 % P(X=1|C=1 S=0)
 clamped = sparsevec([C S],[2 1],5);
 X_sachant_C_nS = tabularFactorCondition(joint, X, clamped);
@@ -126,7 +132,7 @@ disp('**************************************************************************
 fprintf('\n\n*******************************************************************************************************************************************************************************\n')
 fprintf('Divergent blocking\n');
 % Au depart, C, D et X sont dépendants : 
-disp('Au depart, C, D et X sont dépendants :');
+disp('Au départ, C, D et X sont dépendants :');
 % P(X=1|D=0)
 clamped = sparsevec(D,1,5);
 pX_sachant_nD = tabularFactorCondition(joint, X, clamped);
@@ -142,7 +148,7 @@ disp('Les trois probabilités ne sont pas égales, on remarque donc bien que C, D 
 
 % Maintenant, C est observé et ainsi le phénomène divergent blocking va rendre
 % D et X indépendants
-disp('% Maintenant, C est observé et ainsi le phénomène divergent blocking va rendre D et X indépendants');
+disp('Maintenant, C est observé et ainsi le phénomène divergent blocking va rendre D et X indépendants');
 
 % P(X=1|C=1 D=0)
 clamped = sparsevec([C D], [2 1], 5);
