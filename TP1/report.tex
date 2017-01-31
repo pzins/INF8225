@@ -15,9 +15,9 @@
 
 \setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
 
-\title{TP 1}								% Title
-\author{Zins Pierre}						% Author
-\date{Janvier 16, 2017}							% Date
+\title{TP 1}                % Title
+\author{Zins Pierre}            % Author
+\date{Janvier 16, 2017}             % Date
 
 \makeatletter
 \let\thetitle\@title
@@ -36,32 +36,32 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{titlepage}
-	\centering
+  \centering
     \vspace*{0.5 cm}
-    \includegraphics[scale = 0.9]{poly_logo.png}\\[1.0 cm]	% University Logo
-    \textsc{\LARGE Polytechnique Montréal}\\[2.0 cm]	% University Name
-	\textsc{\Large INF8225 }\\[0.5 cm]				% Course Code
-	\textsc{Intelligence artificielle : modèles probabilistes et apprentissage}\\[0.5 cm]				% Course Name
-	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
-	{ \huge \bfseries \thetitle}\\
-	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
-	
-	\begin{minipage}{0.4\textwidth}
-		\begin{flushleft} \large
-			\emph{Auteur:}\\
-			\theauthor
-			\end{flushleft}
-			\end{minipage}~
-			\begin{minipage}{0.4\textwidth}
-			\begin{flushright} \large
-												% Your Student Number
-		\end{flushright}
-	\end{minipage}\\[2 cm]
-	
-	{\large \thedate}\\[2 cm]
+    \includegraphics[scale = 0.9]{poly_logo.png}\\[1.0 cm]  % University Logo
+    \textsc{\LARGE Polytechnique Montréal}\\[2.0 cm]  % University Name
+  \textsc{\Large INF8225 }\\[0.5 cm]        % Course Code
+  \textsc{Intelligence artificielle : modèles probabilistes et apprentissage}\\[0.5 cm]       % Course Name
+  \rule{\linewidth}{0.2 mm} \\[0.4 cm]
+  { \huge \bfseries \thetitle}\\
+  \rule{\linewidth}{0.2 mm} \\[1.5 cm]
+  
+  \begin{minipage}{0.4\textwidth}
+    \begin{flushleft} \large
+      \emph{Auteur:}\\
+      \theauthor
+      \end{flushleft}
+      \end{minipage}~
+      \begin{minipage}{0.4\textwidth}
+      \begin{flushright} \large
+                        % Your Student Number
+    \end{flushright}
+  \end{minipage}\\[2 cm]
+  
+  {\large \thedate}\\[2 cm]
  
-	\vfill
-	
+  \vfill
+  
 \end{titlepage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -83,9 +83,9 @@ Pour expliquer, les trois phénomènes \textit{Explaining away}, \textit{Serial 
 \end{itemize}
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.9]{bayesian_network.png}
-	\caption{Réseau bayésien}
-	\label{fig:reseau_bayesien}
+  \includegraphics[scale=0.9]{bayesian_network.png}
+  \caption{Réseau bayésien}
+  \label{fig:reseau_bayesien}
 \end{center}
 \end{figure}
 
@@ -186,9 +186,9 @@ $P(X=1|C=1) == P(X=1|C=1,D=0) == P(X=1|C=1,D=1) == 0.9$
 \subsection{a)} J'ai crée le réseau bayésien \textit{Alarme} dans Matlab à l'aide de \textit{PMTK}. Le code est disponible dans le fichier \textbf{question2.m}
 \subsection{b)}
 \begin{figure}[H]
-	\includegraphics[scale=0.3]{histo.png}
-	\caption{Réseau bayésien}
-	\label{fig:reseau_bayesien}
+  \includegraphics[scale=0.3]{histo.png}
+  \caption{Réseau bayésien}
+  \label{fig:reseau_bayesien}
 \end{figure}
 Voici l'histogramme de la probabilité jointe du modèle.
 \\Pour les abscisses, on a: 
@@ -230,9 +230,9 @@ Voici les équations permettant de cacluler les probabilités.
      & (P(A=V|C=V, T=F)*P(J=V|A=V)+P(A=F|C=V, T=F)* \\
      & P(J=V|A=F)))+P(C=F)*(P(T=V)*(P(A=V|C=F, T=V)* \\
      & P(J=V|A=V)+P(A=F|C=F, T=V)*P(J=V|A=F))+\\
-	 & P(T=F)*(P(A=V|C=F, T=F)*P(J=V|A=V)+ \\
+   & P(T=F)*(P(A=V|C=F, T=F)*P(J=V|A=V)+ \\
      & P(A=F|C=F, T=F)*P(J=V|A=F)))  \\
-	 & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01))+ \\
+   & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01))+ \\
      &   0.999*(0.002*(0.29*0.7+0.71*0.01)+0.998*(0.001*0.7+0.999*0.01)) \\
      & =0.0117
 \end{split}
@@ -248,9 +248,9 @@ Voici les équations permettant de cacluler les probabilités.
      & = \sum_{T} P(C) * P(T) \sum_{A} P(A|C,T)*P(J=V|A) \\
      & = P(C=V)*(P(T=V)*(P(A=V|C=V, T=V)*\\
      & P(J=V|A=V)+P(A=F|C=V, T=V)*P(J=V|A=F))+\\
-	 & P(T=F)*(P(A=V|C=V, T=F)*P(J=V|A=V)+\\
+   & P(T=F)*(P(A=V|C=V, T=F)*P(J=V|A=V)+\\
      & P(A=F|C=V, T=F)*P(J=V|A=F))) \\
-	 & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01)) \\
+   & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01)) \\
      & =0.000658 \\
      P(C|J=V) & = \frac{0.000658}{0.0117} = 0.056
 \end{split}
@@ -261,7 +261,7 @@ Pour les deux calculs, on retrouve les mêmes résultats que ceux obtenus avec \
 \section{Question 3}
 J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va donc renvoyer les formules qui permettront de calculer des probabilités dans un réseau bayésien.
 \begin{enumerate}
-\item L'utilisateur devra déclarer des noeuds \textit{Function} en précisant un nom, ainsi que la valeur de f(x) et des noeuds \textit{Variable}, en précisant un nom.
+\item L'utilisateur devra déclarer des noeuds \textit{Function} en précisant un nom, ainsi que la valeur de f(x) et des noeuds \textit{Variable} en précisant un nom.
 
 \item Ensuite pour créer son graphe des facteurs, il devra utiliser la méthode \textit{addNeighbours} afin de créer les liens entre les noeuds.
 
@@ -276,17 +276,17 @@ J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va don
 \textbf{\underline{Exemple}}
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.5]{q3.png}
-	\caption{Création du graphe de facteurs}
-	\label{fig:Exemple}
+  \includegraphics[scale=0.5]{q3.png}
+  \caption{Création du graphe de facteurs}
+  \label{fig:Exemple}
 \end{center}
 \end{figure}
 
 En retour, on obtiendra une chaîne de caractères représentant la formule pour obtenir la probabilité souhaitée. Il suffira ensuite de remplacer les probabilités par celles présentes dans les tables de probabilités du réseau bayésien et de dérouler les différentes sommes, afin d'obtenir une valeur numérique.
 
 \paragraph{}
-Pour obtenir ce résultat, j'ai créer 3 classes : \texttt{Node} la classe de base et 2 classes qui en dérivent : \texttt{Function} et \texttt{Variable}. Cela permet de facilement créer un graphe de facteurs. Chaque nœuds (Function ou Variables) pourront déclarer des voisins. \\
-Ensuite, les classes \texttt{Function} et \texttt{Variable} implémentent chacune une méthode \textit{getProbability()} qui va simuler le fait que les voisins envoient des messages au nœud en questions. \\
+Pour obtenir ce résultat, j'ai créer 3 classes : \texttt{Node} la classe de base et 2 classes qui en dérivent : \texttt{Function} et \texttt{Variable}. Cela permet de facilement créer un graphe de facteurs. Chaque nœuds (Function ou Variables) pourront déclarer des voisins avec la méthode \textit{addNeighbours()}. \\
+Ensuite, les classes \texttt{Function} et \texttt{Variable} implémentent chacune une méthode \textit{getProbability()} qui va simuler l'envoi des messages. \\
 Chaque nœud appellera la méthode \textit{getProbability()} de ces voisins et ainsi le comportement de l'algorithme \textbf{sum-produit} sera simulé. Cela revient plus ou moins à faire "remonter" des informations (ici des probabilités) des feuilles de l'arbre, jusqu'à un certain nœud racine.
 \\ \linebreak
 
@@ -295,25 +295,25 @@ Chaque nœud appellera la méthode \textit{getProbability()} de ces voisins et a
 Pour le premier exemple, j'ai repris le graphe des facteurs du cours.
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.3]{rb.png}
-	\caption{graphe de facteurs}
+  \includegraphics[scale=0.3]{rb.png}
+  \caption{graphe de facteurs}
 \end{center}
 \end{figure}
 Voici la déclarations du graphe de facteurs : 
 \\
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.5]{q3.png}
-	\caption{Création du graphe de facteurs}
-	\label{fig:Exemple}
+  \includegraphics[scale=0.5]{q3.png}
+  \caption{Création du graphe de facteurs}
+  \label{fig:Exemple}
 \end{center}
 \end{figure}
 Je souhaite donc calculer la probabilité $ P(x3 | x4) $ \\
 Voici la formule renvoyée par mon programme, qui va permettre de calculer la probabilité de $P(x3|x4)$ :
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.7]{res.png}
-	\caption{résultat}
+  \includegraphics[scale=0.7]{res.png}
+  \caption{résultat}
 \end{center}
 \end{figure}
 Cela correspond à la formule suivante : \\ 
@@ -329,9 +329,9 @@ Voici la déclaration du graphe de facteurs :
 \\
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.7]{q3_2.png}
-	\caption{Création du graphe de facteurs}
-	\label{fig:Exemple}
+  \includegraphics[scale=0.7]{q3_2.png}
+  \caption{Création du graphe de facteurs}
+  \label{fig:Exemple}
 \end{center}
 \end{figure}
 
@@ -343,42 +343,42 @@ Pour cet exemple,
 \item x4 = MarieAppelle
 \item x5 = JeanAppelle
 \end{itemize}
-Comme pour la question d), je souhaite calculer $P(J)$
+Comme pour la question 2.d), je souhaite calculer $P(J)$
 Voici le résultat : 
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.7]{res2.png}
-	\caption{résultat}
+  \includegraphics[scale=0.7]{res2.png}
+  \caption{résultat}
 \end{center}
 \end{figure}
 Cela correspond à la formule suivante : \\ 
-$P(J) = \sum_{A} P(J|A) \sum_{M} P(A|M) \sum_{C T} P(A|C, T) P(C) P(T) $ \\
+$P(J) = \sum_{A} P(J|A) \sum_{M} P(M|A) \sum_{C T} P(A|C, T) P(C) P(T) $ \\
 Cette formule est équivalente à celle trouvée à la question 2.d) : \\
-$P(J) = \sum_{C} P(C) \sum_{T} P(T) \sum_{A} P(A|C,T)*P(J|A)$
+$P(J) = \sum_{C} P(C) \sum_{T} P(T) \sum_{A} P(A|C,T)P(J|A)$
 \\ \linebreak
-Il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule. \\
-Il suffit donc ensuite de développer les sommes et de remplacer les probabilités par les valeurs présentes dans les tables de probabilités du réseau.
+Il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule, mais les deux sont équivalentes. \\
+Il suffit ensuite de développer les sommes et de remplacer les probabilités par les valeurs présentes dans les tables de probabilités du réseau.
 
 Si j'essaie de calculer la probabilité de $P(C|J=V)$, cela marche également. 
 Il suffit d'utiliser la fonction \textit{getProbability()} avec \textbf{x1} et \textbf{x5}, puisqu'il correspondent respectivement à C et J.
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.7]{commande.png}
-	\caption{Appel à etProbability()}
+  \includegraphics[scale=0.7]{commande.png}
+  \caption{Appel à etProbability()}
 \end{center}
 \end{figure}
 Voici le résultat : 
 \begin{figure}[H]
 \begin{center}
-	\includegraphics[scale=0.7]{res3.png}
-	\caption{résultat}
+  \includegraphics[scale=0.7]{res3.png}
+  \caption{résultat}
 \end{center}
 \end{figure}
 Cela correspond à la formule suivante : \\ 
 $P(C|J) = \sum_{A T} P(A|C T) \sum_{M} P(M|A) P(J|A) P(T) P(C) $ \\
 Cette formule est équivalente à celle trouvée à la question 2.d) : \\
-$P(C|J) = \sum_{T} P(T) \sum_{A} P(A|C, T) P(J|A)$
-A nouveau, il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule.
+$P(C|J) = \sum_{T} P(C) P(T) \sum_{A} P(A|C, T) P(J|A)$ \\
+A nouveau, il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule. Cependant, les deux formules restent équivalentes.
 \\ \linebreak
 
 
