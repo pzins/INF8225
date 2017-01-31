@@ -1,0 +1,392 @@
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{breqn}
+
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+\title{TP 1}								% Title
+\author{Zins Pierre}						% Author
+\date{Janvier 16, 2017}							% Date
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\pagestyle{fancy}
+\fancyhf{}
+%\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.5 cm}
+    \includegraphics[scale = 0.9]{poly_logo.png}\\[1.0 cm]	% University Logo
+    \textsc{\LARGE Polytechnique Montréal}\\[2.0 cm]	% University Name
+	\textsc{\Large INF8225 }\\[0.5 cm]				% Course Code
+	\textsc{Intelligence artificielle : modèles probabilistes et apprentissage}\\[0.5 cm]				% Course Name
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft} \large
+			\emph{Auteur:}\\
+			\theauthor
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+			\begin{flushright} \large
+												% Your Student Number
+		\end{flushright}
+	\end{minipage}\\[2 cm]
+	
+	{\large \thedate}\\[2 cm]
+ 
+	\vfill
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{Appendices}
+\section{Question 1}
+Pour expliquer, les trois phénomènes \textit{Explaining away}, \textit{Serial blocking} et \textit{Divergent blocking}, je me suis basé sur le réseau bayésien suivant : 
+\begin{itemize}
+\item Pollution (trop importante): P
+\item Smoker : S
+\item Cancer : C
+\item XRay : X
+\item Dispnea : D
+\end{itemize}
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.9]{bayesian_network.png}
+	\caption{Réseau bayésien}
+	\label{fig:reseau_bayesien}
+\end{center}
+\end{figure}
+
+Voici les tables de probabilités associées : 
+\\
+\\
+\textbf{Pollution :}
+\begin{tabular}{|c|c|}
+  \hline
+  P(P=F) & P(P=V) \\
+  \hline
+  0.9 & 0.1 \\
+  \hline
+\end{tabular}
+\\
+\\
+\\
+\textbf{Smoker :}
+\begin{tabular}{|c|c|}
+  \hline
+  P(S=F) & P(S=V) \\
+  \hline
+  0.7 & 0.3 \\
+  \hline
+\end{tabular}
+\\
+\\
+\\
+\textbf{Cancer :  }
+\begin{tabular}{|c|c|c|c|}
+  \hline
+  P & S & P(C=F) & P(C=V) \\
+  \hline
+  V & V & 0.95 & 0.05 \\
+  V & F & 0.98 & 0.02 \\
+  F & V & 0.97 & 0.03 \\
+  F & F & 0.999& 0.0001 \\
+  \hline
+\end{tabular}
+\\
+\\
+\\
+\textbf{XRay :}
+\begin{tabular}{|c|c|c|}
+  \hline
+  C & P(X=F) & P(X=V) \\
+  \hline
+  V & 0.1 & 0.9 \\
+  F & 0.8 & 0.2 \\
+  \hline
+\end{tabular}
+\\
+\\
+\\
+\textbf{Dispnea :}
+\begin{tabular}{|c|c|c|}
+  \hline
+  C & P(D=F) & P(D=V)\\
+  \hline
+  V & 0.35 & 0.65 \\
+  F & 0.7 & 0.3 \\
+  \hline
+\end{tabular}
+\subsection{Explaining away}
+\subsubsection{Explication théorique}
+Dans un réseau bayésien, le phénomène de "explaining away" est présent lorsque l'on a au moins trois nœuds : les nœuds A et C parents d'un nœud B. Au départ, A et C sont indépendants, mais à partir du moment où l'on a une information sur B (B est observé) ou un de ses enfants, A et C deviennent dépendants. En effet, un changement sur la probabilité de A entraînera l'effet inverse sur la probabilité de C. Par exemple, si la probabilité de augmente et approche 1, cela suffira a expliquer B et donc la probabilité de C va baisser.
+
+\subsubsection{Explication pratique}
+A partir de mon réseau bayésien, on peut remarquer ce phénomènes entre les nœuds S, P et C. Au départ, S et P sont indépendants comme on peut le voir à partir des égalités suvantes :
+$P(S=1) == P(S=1|P=1) == P(S=1|P=0) == 0.3$
+\\
+Cependant, si C est observé, alors S et P deviennent dépendants :
+\begin{itemize}
+\item Si l'on a l'information est que P est vrai alors c'est lui qui va expliquer le fait que C soit vrai et ainsi la probabilité de S va baisser :
+\\ $P(S=1|C=1,P=1) = 0.517 \quad < \quad P(S=1|C=1) = 0.825$ \\
+\item à l'inverse si l'information est que P est faux alors c'est S qui va expliquer le fait que C soit vrai et ainsi la probabilité de S va augmenter :
+\\ $P(S=1|C=1,P=0) = 0.928 \quad > \quad P(S=1|C=1) = 0.825$ \\
+\end{itemize}
+
+\subsection{Serial blocking}
+\subsubsection{Explication théorique}
+Pour ce phénomène nous avons la situation suivante : un nœud A parent d'un nœud B, lui même parent d'un nœud C. Au départ, les trois nœuds sont dépendants, un indice sur le fait que C est vrai, va augmenter la probabilité de B qui va ensuite faire augmenter la probabilité de A. Cependant, si B est observé, A et C vont devenir indépendants. En effet, le fait d'observer B va couper le lien de dépendance entre A et C. Le fait que la probabilité de C augmente sera uniquement expliqué par le fait que B soit observé et ainsi, il n'y aura aucun effet sur A. De même dans le sens inverse, tout changement sur A sera "absorbé" par B et n'affectera pas C.
+\subsubsection{Explication pratique}
+Ce phénomène est visible au travers des nœuds S, C et X qui sont dépendants entre eux au départ. S et X ne sont donc pas indépendants comme on peut le vérifier puisque : $P(X=1)=0.202 \quad != \quad P(X=1|S=0)=0.222\quad !=\quad P(X=1|S=1)=0.208$ \\
+Cependant, si l'on observe C, alors X et S vont devenir indépendants et on a les égalités suivantes : \\
+$P(X=1|C=1) == P(X=1|C=1,S=0) == P(X=1|C=1,S=1) == 0.9$
+
+\subsection{Divergent blocking}
+\subsubsection{Explication théorique}
+Pour ce phénomène, nous devons considérer la situation suivante : un nœud B parent des nœuds A et C.
+Au départ, A et C dépendants car une augmentation de probabilité sur A va entraîner une augmentation sur B qui ensuite fera augmenter celle de C. Cependant, si B est observé A et C vont devenir indépendants. En effet, comme dans le cas du \textit{Serial blocking}, le fait d'observer B va couper le lien de dépendance entre A et C. Par exemple, une augmentation de la probabilité de A sera uniquement expliquée par B et n'aura aucun impact sur C.
+\subsubsection{Explication pratique}
+Ce phénomène est visible au travers des nœuds C, D et X qui sont dépendants entre eux au départ. D et X ne sont donc pas indépendants comme on peut le vérifier puisque : $P(X=1)=0.204\quad != \quad P(X=1|D=0)=0.217\quad !=\quad P(X=1|D=1)=0.208$ \\
+Cependant, si l'on observe C, alors X et S vont devenir indépendants et on a les égalités suivantes : \\
+$P(X=1|C=1) == P(X=1|C=1,D=0) == P(X=1|C=1,D=1) == 0.9$
+
+\section{Question 2}
+\subsection{a)} J'ai crée le réseau bayésien \textit{Alarme} dans Matlab à l'aide de \textit{PMTK}. Le code est disponible dans le fichier \textbf{question2.m}
+\subsection{b)}
+\begin{figure}[H]
+	\includegraphics[scale=0.3]{histo.png}
+	\caption{Réseau bayésien}
+	\label{fig:reseau_bayesien}
+\end{figure}
+Voici l'histogramme de la probabilité jointe du modèle.
+\\Pour les abscisses, on a: 
+\begin{itemize}
+\item Cambriolage Tremblement Alarme MarieAppelle JeanAppelle
+\item avec 1 = F et 2 = V
+\end{itemize}
+
+\subsection{c)}
+Avec PMTK, j'ai pu calculer les différentes probabilités.
+\begin{itemize}
+\item $ P(Cambriolage=V|MarieAppelle=V, JeanAppelle=F) = 0.005130 $
+\item $ P(Cambriolage=V|MarieAppelle=F, JeanAppelle=V) = 0.006876 $
+\item $ P(Cambriolage=V|MarieAppelle=V, JeanAppelle=V) = 0.284172 $
+\item $ P(Cambriolage=V|MarieAppelle=F, JeanAppelle=F) = 0.000090 $
+\item $ P(Cambriolage=V|MarieAppelle=V) = 0.016284 $
+\item $ P(Cambriolage=V|JeanAppelle=V) = 0.056117 $
+\end{itemize}
+\subsection{d)}
+\begin{itemize}
+\item $ P(Cambriolage=V) = 0.001000 $
+\item $ P(Tremblement=V) = 0.002000 $
+\item $ P(Alarme=V) = 0.002516 $
+\item $ P(MarieAppelle=V) = 0.052139 $
+\item $ P(JeanAppelle=V) = 0.011736 $
+\end{itemize}
+
+\subsection{e)}
+Voici les équations permettant de cacluler les probabilités.
+\begin{equation}
+\begin{split}
+     P(J) & = \sum_{C} \sum_{T} \sum_{A} \sum_{M} P(C, T, A, M, J) \\
+     & = \sum_{C} \sum_{T} \sum_{A} \sum_{M} P(C)*P(T)*P(A|C,T)*P(M|A)*P(J|A) \\
+     & = \sum_{C} \sum_{T} \sum_{A} P(C)*P(T)*P(A|C,T)*P(J|A) * \underbrace{\sum_{M} * P(M|A)}_{=1}\\
+     & = \sum_{C} \sum_{T} \sum_{A} P(C)*P(T)*P(A|C,T)*P(J|A) \\
+     & = \sum_{C} P(C) * \sum_{T} P(T) \sum_{A} P(A|C,T)*P(J|A) \\
+     & = P(C=V)*(P(T=V)*(P(A=V|C=V, T=V)*P(J=V|A=V)+ \\
+     & P(A=F|C=V, T=V)*P(J=V|A=F))+P(T=F)* \\
+     & (P(A=V|C=V, T=F)*P(J=V|A=V)+P(A=F|C=V, T=F)* \\
+     & P(J=V|A=F)))+P(C=F)*(P(T=V)*(P(A=V|C=F, T=V)* \\
+     & P(J=V|A=V)+P(A=F|C=F, T=V)*P(J=V|A=F))+\\
+	 & P(T=F)*(P(A=V|C=F, T=F)*P(J=V|A=V)+ \\
+     & P(A=F|C=F, T=F)*P(J=V|A=F)))  \\
+	 & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01))+ \\
+     &   0.999*(0.002*(0.29*0.7+0.71*0.01)+0.998*(0.001*0.7+0.999*0.01)) \\
+     & =0.0117
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+     P(C|J=V) & = \frac{P(C,J=V)}{P(J=V)} \\
+     P(C, J=V) &= \sum_{T} \sum_{A} \sum_{M} P(C, T, A, M, J=V)\\
+     &= \sum_{T} \sum_{A} \sum_{M} P(C)*P(T)*P(A|C,T)*P(M|A)*P(J|A) \\
+     & = \sum_{T} \sum_{A} P(C)*P(T)*P(A|C,T)*P(J=V|A) * \underbrace{\sum_{M} * P(M|A)}_{=1}\\
+     & = \sum_{T} \sum_{A} P(C)*P(T)*P(A|C,T)*P(J=V|A) \\
+     & = \sum_{T} P(C) * P(T) \sum_{A} P(A|C,T)*P(J=V|A) \\
+     & = P(C=V)*(P(T=V)*(P(A=V|C=V, T=V)*\\
+     & P(J=V|A=V)+P(A=F|C=V, T=V)*P(J=V|A=F))+\\
+	 & P(T=F)*(P(A=V|C=V, T=F)*P(J=V|A=V)+\\
+     & P(A=F|C=V, T=F)*P(J=V|A=F))) \\
+	 & = 0.001*(0.002*(0.950.7+0.05*0.01)+0.98*(0.94*0.7+0.06*0.01)) \\
+     & =0.000658 \\
+     P(C|J=V) & = \frac{0.000658}{0.0117} = 0.056
+\end{split}
+\end{equation}
+
+Pour les deux calculs, on retrouve les mêmes résultats que ceux obtenus avec \textit{Matlab} et \textit{PMTK}
+
+\section{Question 3}
+J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va donc renvoyer les formules qui permettront de calculer des probabilités dans un réseau bayésien.
+\begin{enumerate}
+\item L'utilisateur devra déclarer des noeuds \textit{Function} en précisant un nom, ainsi que la valeur de f(x) et des noeuds \textit{Variable}, en précisant un nom.
+
+\item Ensuite pour créer son graphe des facteurs, il devra utiliser la méthode \textit{addNeighbours} afin de créer les liens entre les noeuds.
+
+\item Enfin, la fonction \textit{getProbabilty(variable, observed\_variables)} permettra d'obtenir un résultat.
+\begin{itemize}
+\item \textbf{variable} : variable pour laquelle on veut calculer une probabilité 
+\item \textbf{observed\_variables} : liste contenant toutes les variables observées
+\\ \linebreak
+\end{itemize}
+\end{enumerate}
+
+\textbf{\underline{Exemple}}
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.5]{q3.png}
+	\caption{Création du graphe de facteurs}
+	\label{fig:Exemple}
+\end{center}
+\end{figure}
+
+En retour, on obtiendra une chaîne de caractères représentant la formule pour obtenir la probabilité souhaitée. Il suffira ensuite de remplacer les probabilités par celles présentes dans les tables de probabilités du réseau bayésien et de dérouler les différentes sommes, afin d'obtenir une valeur numérique.
+
+\paragraph{}
+Pour obtenir ce résultat, j'ai créer 3 classes : \texttt{Node} la classe de base et 2 classes qui en dérivent : \texttt{Function} et \texttt{Variable}. Cela permet de facilement créer un graphe de facteurs. Chaque nœuds (Function ou Variables) pourront déclarer des voisins. \\
+Ensuite, les classes \texttt{Function} et \texttt{Variable} implémentent chacune une méthode \textit{getProbability()} qui va simuler le fait que les voisins envoient des messages au nœud en questions. \\
+Chaque nœud appellera la méthode \textit{getProbability()} de ces voisins et ainsi le comportement de l'algorithme \textbf{sum-produit} sera simulé. Cela revient plus ou moins à faire "remonter" des informations (ici des probabilités) des feuilles de l'arbre, jusqu'à un certain nœud racine.
+\\ \linebreak
+
+\textbf{\underline{Exemple 1}}
+\\
+Pour le premier exemple, j'ai repris le graphe des facteurs du cours.
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.3]{rb.png}
+	\caption{graphe de facteurs}
+\end{center}
+\end{figure}
+Voici la déclarations du graphe de facteurs : 
+\\
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.5]{q3.png}
+	\caption{Création du graphe de facteurs}
+	\label{fig:Exemple}
+\end{center}
+\end{figure}
+Je souhaite donc calculer la probabilité $ P(x3 | x4) $ \\
+Voici la formule renvoyée par mon programme, qui va permettre de calculer la probabilité de $P(x3|x4)$ :
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.7]{res.png}
+	\caption{résultat}
+\end{center}
+\end{figure}
+Cela correspond à la formule suivante : \\ 
+$P(x3|x4) = \sum_{x1} P(x3|x1) P(x1) \sum_{x2} P(x4|x1, x2) P(x2) \sum_{x5} P(x5|x2) 1 $
+
+On retrouve donc bien la formule permettant le calcul de $P(x3|x4)$
+
+\textbf{\underline{Exemple 2}}
+\\
+Dans un second temps, j'ai repris le réseau bayésien de la question 2.
+
+Voici la déclaration du graphe de facteurs :
+\\
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.7]{q3_2.png}
+	\caption{Création du graphe de facteurs}
+	\label{fig:Exemple}
+\end{center}
+\end{figure}
+
+Pour cet exemple, 
+\begin{itemize}
+\item x1 = Cambriolage
+\item x2 = Tremblement
+\item x3 = Alarme
+\item x4 = MarieAppelle
+\item x5 = JeanAppelle
+\end{itemize}
+Comme pour la question d), je souhaite calculer $P(J)$
+Voici le résultat : 
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.7]{res2.png}
+	\caption{résultat}
+\end{center}
+\end{figure}
+Cela correspond à la formule suivante : \\ 
+$P(J) = \sum_{A} P(J|A) \sum_{M} P(A|M) \sum_{C T} P(A|C, T) P(C) P(T) $ \\
+Cette formule est équivalente à celle trouvée à la question 2.d) : \\
+$P(J) = \sum_{C} P(C) \sum_{T} P(T) \sum_{A} P(A|C,T)*P(J|A)$
+\\ \linebreak
+Il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule. \\
+Il suffit donc ensuite de développer les sommes et de remplacer les probabilités par les valeurs présentes dans les tables de probabilités du réseau.
+
+Si j'essaie de calculer la probabilité de $P(C|J=V)$, cela marche également. 
+Il suffit d'utiliser la fonction \textit{getProbability()} avec \textbf{x1} et \textbf{x5}, puisqu'il correspondent respectivement à C et J.
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.7]{commande.png}
+	\caption{Appel à etProbability()}
+\end{center}
+\end{figure}
+Voici le résultat : 
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[scale=0.7]{res3.png}
+	\caption{résultat}
+\end{center}
+\end{figure}
+Cela correspond à la formule suivante : \\ 
+$P(C|J) = \sum_{A T} P(A|C T) \sum_{M} P(M|A) P(J|A) P(T) P(C) $ \\
+Cette formule est équivalente à celle trouvée à la question 2.d) : \\
+$P(C|J) = \sum_{T} P(T) \sum_{A} P(A|C, T) P(J|A)$
+A nouveau, il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule.
+\\ \linebreak
+
+
+
+
+%\bibliographystyle{plain}
+
+
+%\bibliography{biblist}
+
+\end{document}

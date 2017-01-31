@@ -33,6 +33,7 @@ class Variable(Node):
 		self.root = False
 
 	def getMessage(self, caller, observed):
+		# print("getMessage Variables " + self.name + " from " + caller)
 		self.visited = True
 		if len(self.neighbours) == 1 and not self.root:
 			return "1"
@@ -57,22 +58,34 @@ class Function(Node):
 
 
 	def getMessage(self, caller, observed):
+		# print("getMessage Function " + self.name + " from " + caller)
 		self.visited = True
 		# if function node is a leaf => no sum
 		if len(self.neighbours) == 1:
 			return self.proba
 		st = ""
+		# product of incomming messages
 		for i in self.neighbours:
 			#one node should not be observed and not considered twice
 			if not i.visited and i not in observed:
-				# marginalisation : if other variables (x1, x2, ...) are in the function, we compute a sum over these variables
-				if len(self.proba_args)>1:
-					somme_str = "SOMME_"
-					for j in self.proba_args:
-						# no sum over the current variable and observed variables
-						if j != caller and not j in [k.name for k in observed]:
-							somme_str += "_"+j
-				st += somme_str + " " + self.proba + " " + i.getMessage(self.name, observed)
+				st += i.getMessage(self.name, observed)
+
+		# marginalisation : if other variables (x1, x2, ...) are in the function, we compute a sum over these variables
+		tmp_proba_args = self.proba_args
+		# no sum over the caller
+		if caller in tmp_proba_args:
+			tmp_proba_args.remove(caller)
+		# no sum over observed variables
+		for i in [k.name for k in observed]:
+			if i in tmp_proba_args:
+				tmp_proba_args.remove(i)
+		somme_str = ""
+		# compute sum over variables if at least 1 remain
+		if len(tmp_proba_args)>=1:
+			somme_str = " SOMME"
+			for j in tmp_proba_args:
+				somme_str += "_"+j
+		st = somme_str + " " + self.proba + " " + st
 		return st
 
 def getProbability(node, observed):
@@ -80,6 +93,38 @@ def getProbability(node, observed):
 	node.root = True
 	return node.getMessage(node.name, observed)
 
+"""
+# Exemple avec le RB du TP
+# declaration of the factor graph
+fa = Function("fc", "P(C)")
+fb = Function("ft", "P(T)")
+fc = Function("fa", "P(A|C, T)")
+fd = Function("fm", "P(M|A)")
+fe = Function("fj", "P(J|A)")
+
+x1 = Variable("C")
+x2 = Variable("T")
+x3 = Variable("A")
+x4 = Variable("M")
+x5 = Variable("J")
+
+# declaration of the edges
+x5.addNeighbours([fe])
+fe.addNeighbours([x3, x5])
+fb.addNeighbours([x2])
+x2.addNeighbours([fb, fc])
+fd.addNeighbours([x3, x4])
+x4.addNeighbours([fd])
+x1.addNeighbours([fc, fa])
+fa.addNeighbours([x1])
+fc.addNeighbours([x1, x2, x3])
+x3.addNeighbours([fc, fd, fe])
+
+# compute probability
+print(getProbability(x1, [x5]))
+"""
+
+# Exemple avec le RB du cours
 # declaration of the factor graph
 fa = Function("fa", "P(x1)")
 fb = Function("fb", "P(x2)")
@@ -107,3 +152,4 @@ x3.addNeighbours([fc])
 
 # compute probability
 print(getProbability(x3, [x4]))
+# """
