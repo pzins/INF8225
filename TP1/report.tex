@@ -16,7 +16,7 @@
 \setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
 
 \title{TP 1}                % Title
-\author{Zins Pierre}            % Author
+\author{Zins Pierre 1863527}            % Author
 \date{Janvier 16, 2017}             % Date
 
 \makeatletter
@@ -259,11 +259,11 @@ Voici les équations permettant de cacluler les probabilités.
 Pour les deux calculs, on retrouve les mêmes résultats que ceux obtenus avec \textit{Matlab} et \textit{PMTK}
 
 \section{Question 3}
-J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va donc renvoyer les formules qui permettront de calculer des probabilités dans un réseau bayésien.
+J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va donc renvoyer les formules littérales qui permettront de calculer des probabilités dans un réseau bayésien.
 \begin{enumerate}
-\item L'utilisateur devra déclarer des noeuds \textit{Function} en précisant un nom, ainsi que la valeur de f(x) et des noeuds \textit{Variable} en précisant un nom.
+\item L'utilisateur devra déclarer des noeuds \textit{"Function"} en précisant un nom, ainsi que la valeur de f(x) et des noeuds \textit{"Variable"} en précisant un nom.
 
-\item Ensuite pour créer son graphe des facteurs, il devra utiliser la méthode \textit{addNeighbours} afin de créer les liens entre les noeuds.
+\item Ensuite pour créer le graphe des facteurs, il devra utiliser la méthode \textit{addNeighbours} afin de créer les liens entre les noeuds.
 
 \item Enfin, la fonction \textit{getProbabilty(variable, observed\_variables)} permettra d'obtenir un résultat.
 \begin{itemize}
@@ -277,7 +277,7 @@ J'ai implémenté l'algorithme \textbf{sum-product} en Python. Ce dernier va don
 \begin{figure}[H]
 \begin{center}
   \includegraphics[scale=0.5]{q3.png}
-  \caption{Création du graphe de facteurs}
+  \caption{Création du graphe de facteurs, calcul $P(x3|x4)$}
   \label{fig:Exemple}
 \end{center}
 \end{figure}
@@ -343,7 +343,7 @@ Pour cet exemple,
 \item x4 = MarieAppelle
 \item x5 = JeanAppelle
 \end{itemize}
-Comme pour la question 2.d), je souhaite calculer $P(J)$
+Comme pour la question 2.d), je souhaite calculer $P(J)$ \\
 Voici le résultat : 
 \begin{figure}[H]
 \begin{center}
@@ -356,7 +356,7 @@ $P(J) = \sum_{A} P(J|A) \sum_{M} P(M|A) \sum_{C T} P(A|C, T) P(C) P(T) $ \\
 Cette formule est équivalente à celle trouvée à la question 2.d) : \\
 $P(J) = \sum_{C} P(C) \sum_{T} P(T) \sum_{A} P(A|C,T)P(J|A)$
 \\ \linebreak
-Il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule, mais les deux sont équivalentes. \\
+Il y a juste eu des simplifications ($\sum_{M} P(M|A) = 1$) et les sommes sont ordonnées différemment dans la seconde formule, mais les deux sont équivalentes.  Dans les deux cas, on trouve 0.0117.\\ 
 Il suffit ensuite de développer les sommes et de remplacer les probabilités par les valeurs présentes dans les tables de probabilités du réseau.
 
 Si j'essaie de calculer la probabilité de $P(C|J=V)$, cela marche également. 
@@ -364,7 +364,7 @@ Il suffit d'utiliser la fonction \textit{getProbability()} avec \textbf{x1} et \
 \begin{figure}[H]
 \begin{center}
   \includegraphics[scale=0.7]{commande.png}
-  \caption{Appel à etProbability()}
+  \caption{Appel à getProbability()}
 \end{center}
 \end{figure}
 Voici le résultat : 
@@ -378,15 +378,13 @@ Cela correspond à la formule suivante : \\
 $P(C|J) = \sum_{A T} P(A|C T) \sum_{M} P(M|A) P(J|A) P(T) P(C) $ \\
 Cette formule est équivalente à celle trouvée à la question 2.d) : \\
 $P(C|J) = \sum_{T} P(C) P(T) \sum_{A} P(A|C, T) P(J|A)$ \\
-A nouveau, il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule. Cependant, les deux formules restent équivalentes.
+A nouveau, il y a simplement eu des simplifications et les sommes sont ordonnées différemment dans la seconde formule. Cependant, les deux formules restent équivalentes. Dans les deux cas, on trouve 0.056.
 \\ \linebreak
+Ainsi mon programme va simuler l'algorithme \textbf{sum-product} et l'envoi des différents messages, ce qui permettra de calculer n'importe quelle probabilité dans un réseau bayésien. On obtiendra en sortie une formule que l'on peut facilement calculer, puisque toutes les probabilités présentes dans la formules sont présentes dans les tables de probabilités associées au réseau bayésien.
 
 
 
 
-%\bibliographystyle{plain}
 
-
-%\bibliography{biblist}
 
 \end{document}
