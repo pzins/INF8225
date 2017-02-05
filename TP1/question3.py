@@ -33,7 +33,6 @@ class Variable(Node):
 		self.root = False
 
 	def getMessage(self, caller, observed):
-		# print("getMessage Variables " + self.name + " from " + caller)
 		self.visited = True
 		if len(self.neighbours) == 1 and not self.root:
 			return "1"
@@ -58,7 +57,6 @@ class Function(Node):
 
 
 	def getMessage(self, caller, observed):
-		# print("getMessage Function " + self.name + " from " + caller)
 		self.visited = True
 		# if function node is a leaf => no sum
 		if len(self.neighbours) == 1:
@@ -94,7 +92,7 @@ def getProbability(node, observed):
 	return node.getMessage(node.name, observed)
 
 """
-# Exemple avec le RB du TP
+# Exemple avec le réseau bayesien du TP
 # declaration of the factor graph
 fa = Function("fc", "P(C)")
 fb = Function("ft", "P(T)")
@@ -124,7 +122,7 @@ x3.addNeighbours([fc, fd, fe])
 print(getProbability(x1, [x5]))
 """
 
-# Exemple avec le RB du cours
+# Exemple avec le reseau bayesien du cours
 # declaration of the factor graph
 fa = Function("fa", "P(x1)")
 fb = Function("fb", "P(x2)")
@@ -152,4 +150,3 @@ x3.addNeighbours([fc])
 
 # compute probability
 print(getProbability(x3, [x4]))
-# """
