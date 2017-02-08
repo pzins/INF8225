@@ -25,6 +25,8 @@ for k=1:4
 end
 Z = sum(P_Y);
 P_Y_sachant_X = P_Y ./ [Z;Z;Z;Z]
+% sum(sum(P_Y_sachant_X .* X))
+
 % Prob_y_sachant_x=P_Y;
 % for k=1:length(Z)
 %     Prob_y_sachant_x(:,k)=Prob_y_sachant_x(:,k)/Z(1,k);
@@ -36,13 +38,9 @@ b=sum(exp(possibleY * Theta * X));
 min(min(a==b));
 % ----------------
 
-sum(sum(log(Y*P_Y_sachant_X))) %test mais en faite pas encore ca
-a = sum(sum(P_Y_sachant_X));
-b = sum(sum(((Y * Theta) .* X')'));
-
-
-
-
+% sum(sum(log(Y*P_Y_sachant_X))) %test mais en faite pas encore ca
+a = sum((Y * Theta)' .* X)
+sum(a-log(Z))
 
 logVraisemblance = sum(sum(((Y * Theta) .* X')') - log(sum(exp(possibleY * Theta * X))))
 logVraisemblance_ = sum(sum(((Y * Theta) .* X')') - log(sum(exp(Theta*X))));
