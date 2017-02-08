@@ -1,5 +1,5 @@
 load 20news_w100
-whos;
+whos
 n = 4;
 m = size(newsgroups, 2);
 o = ones(1, m);
@@ -10,25 +10,42 @@ Y = sparse(i, j, o, m, n);
 Theta = rand(4, 101)-0.5;
 X = documents;
 X = [X; ones(1,16242)];
-taux_dapprentissage = 0.0005;
+taux_dapprentissage = 0.0005;   
 possibleY = eye(n);
+
 
 [XA, XV, XT] = create_train_valid_test_splits(X);
 converged = false;
-size(X)
 
-% r = (Y*Theta).*X';
-% sum(sum(r))
-log(sum(diag((Theta*X)*Y)))
+
+for k=1:4
+    vector=zeros(1,4);
+    vector(1,k)=1;
+    P_Y(k,:)=exp(vector*Theta*X);
+end
+Z = sum(P_Y);
+P_Y_sachant_X = P_Y ./ [Z;Z;Z;Z]
+Prob_y_sachant_x=P_Y;
+for k=1:length(Z)
+    Prob_y_sachant_x(:,k)=Prob_y_sachant_x(:,k)/Z(1,k);
+end
+min(min(Prob_y_sachant_x == P_Y_sachant_X))
+% sum(sum(P_Y))
+
+% sum(sum(exp(Theta*X)))
+
+
 
 logVraisemblance = sum(sum(((Y * Theta) .* X')') - log(sum(exp(possibleY * Theta * X))));
+logVraisemblance_ = sum(sum(((Y * Theta) .* X')') - log(sum(exp(Theta*X))));
 
-% size(X)
-% (Theta'*X')
+left = Y' * X';
 
-% sum(sum(Theta*X))
-% sum(sum(Theta .* X'))
+Z = sum(exp(Theta*X));
 break
+
+
+
 while ~converged
 %    ds le premier mult d'abord par Y permet de ne pas faire pr ts les Y
 %   ds le second, on fait une somme sur tt les Y dc on fait juste Theta*X
