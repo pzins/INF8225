@@ -16,7 +16,7 @@ taux_dapprentissage =0.0005;
 %% Data Train
 
 N=length(X);
-set_data=randperm(N);
+set_data=randperm(N)
 
 X_train=X(:,set_data(1:floor(0.7*N)));
 Y_train=Y(set_data(1:floor(0.7*N)),:);
