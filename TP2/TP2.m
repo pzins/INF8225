@@ -17,14 +17,17 @@ possibleY = eye(n);
 [XA, XV, XT] = create_train_valid_test_splits(X);
 converged = false;
 
+Z = sum(exp(Theta * X)); %Teta * X pr faire le produit coeff x instance pr chaque classe
+% on retrouve une matrice 4x16242 avc un score pr chaque classe pr chaque
+% instance puis on somme sur les classes
+left = sum((Y * Theta)' .* X); %Y*Theta => coeff corrspondant ) la bonne classe à chaque position du Y, on transpose pr avoir 101x16242 comme X
+% sum pr avoir pr chaque instance une valeur 
+sum(left-log(Z))
 
-for k=1:4
-    vector=zeros(1,4);
-    vector(1,k)=1;
-    P_Y(k,:)=exp(vector*Theta*X);
-end
-Z = sum(P_Y);
-P_Y_sachant_X = P_Y ./ [Z;Z;Z;Z]
+sum(left - log(Z))
+break
+
+P_Y_sachant_X = P_Y ./ [Z;Z;Z;Z];
 % sum(sum(P_Y_sachant_X .* X))
 
 % Prob_y_sachant_x=P_Y;
@@ -39,8 +42,8 @@ min(min(a==b));
 % ----------------
 
 % sum(sum(log(Y*P_Y_sachant_X))) %test mais en faite pas encore ca
-a = sum((Y * Theta)' .* X)
-sum(a-log(Z))
+a = sum((Y * Theta)' .* X);
+sum(a-log(Z));
 
 logVraisemblance = sum(sum(((Y * Theta) .* X')') - log(sum(exp(possibleY * Theta * X))))
 logVraisemblance_ = sum(sum(((Y * Theta) .* X')') - log(sum(exp(Theta*X))));
