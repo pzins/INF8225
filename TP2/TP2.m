@@ -23,7 +23,8 @@ Z = sum(exp(Theta * X)); %Teta * X pr faire le produit coeff x instance pr chaqu
 % instance puis on somme sur les classes
 left = sum((Y * Theta)' .* X); %Y*Theta => coeff corrspondant ) la bonne classe à chaque position du Y, on transpose pr avoir 101x16242 comme X
 % sum pr avoir pr chaque instance une valeur 
-% sum(left-log(Z))
+sum(left-log(Z));
+
 
 % calcul de P(Y|X)
 up = exp(Theta*X); %numerateur
@@ -33,30 +34,26 @@ PYsX = up ./ [Z;Z;Z;Z];
 
 yixi = Y' * X';
 
-% sum(sum(log(Y*P_Y_sachant_X))) %test mais en faite pas encore ca
-a = sum((Y * Theta)' .* X);
-sum(a-log(Z));
-
-% logVraisemblance = sum(sum(((Y * Theta) .* X')') - log(sum(exp(possibleY * Theta * X))))
-% logVraisemblance_ = sum(sum(((Y * Theta) .* X')') - log(sum(exp(Theta*X))));
-
-left = Y' * X';
-right = PYsX * X';
-a = left-right;
+% Z = repmat(sum(exp(Theta * X)),4,1);
+% esperance = ((exp(Theta * X)./Z)' )' * X';
+% gradient = yixi - esperance;
+% min(min(a==gradient))
 
 
-Z = repmat(sum(exp(Theta * X)),4,1);
-esperance = ((exp(Theta * X)./Z)' )' * X';
-gradient = yixi - esperance;
-min(min(a==gradient))
-
-break    
 while ~converged
-%    ds le premier mult d'abord par Y permet de ne pas faire pr ts les Y
-%   ds le second, on fait une somme sur tt les Y dc on fait juste Theta*X
+    Z = sum(exp(Theta * X));
+    left = sum((Y * Theta)' .* X);
+    logV = sum(left-log(Z))
+    
+    % calcul de P(Y|X)
+    up = exp(Theta*X);
+    PYsX = up ./ [Z;Z;Z;Z];
+%     calcul du gradient
+    right = PYsX * X';
+    gradient = -(yixi-right);
 
-    logV = sum(sum((Y*Theta) .* X) - log(sum(exp(Theta*X))))
-%         logVraisemblance = sum(sum(((YA * Theta) .* XA')') - log(sum(exp(possibleY * Theta * XA))));
-
+    %     update theta
+    Theta = Theta - taux_dapprentissage * gradient;
+    pause
 end
 
