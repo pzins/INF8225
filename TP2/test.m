@@ -28,7 +28,7 @@ while ~converged
     %Apprentissage
     Z = repmat(sum(exp(possibleY * Theta * XA)),4,1);
     esperance = ((exp(possibleY * Theta * XA)./Z)' * possibleY)' * XA';
-    gradient = yixi - esperance;
+    gradient = yixi - esperance
     Theta = Theta + (taux_dapprentissage * gradient);
     baprecision = [baprecision, compute_precision(XA,YA,Theta)];
     bvprecision = [bvprecision, compute_precision(XV,YV,Theta)];
@@ -86,8 +86,3 @@ title('LogVraisemblance en fonction du nombre d''itération');
 xlabel('Nombre d''itération');
 ylabel('LogVraisemblance');
 legend('Batch','MiniBatch');
-
-precisionTest = compute_precision(XT,YT, Theta);
-fprintf('Precision sur lensemble de test = %f\n', full(precisionTest));
-Contact GitHub API Training Shop Blog About
-© 2017 GitHub, Inc. Terms Privacy Security Status Help
