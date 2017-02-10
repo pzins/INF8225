@@ -63,15 +63,20 @@ yixi = YA' * XA';
 % gradient = yixi - esperance;
 % min(min(a==gradient))
 logV = -10e10;
+precision = [0 0]
 while ~converged  
     oldLogV = logV
-
+    
+%     calcul de la log vraisemblance
     Z = sum(exp(Theta * XA));
     left = sum((YA * Theta)' .* XA);
     logV = sum(left-log(Z))
-    if abs(oldLogV-logV) < 0.1,
-        converged = 1
-    end
+    oldPrecision = precision;
+
+%     if abs(oldLogV-logV) < 0.1,
+%         converged = 1
+%     end
+    
     % calcul de P(Y|X)
     up = exp(Theta*XA);
     PYsX = up ./ [Z;Z;Z;Z];
@@ -81,18 +86,44 @@ while ~converged
 %     Y, on fait avec les proba de PYsX pr get une esperance
     gradient = -(yixi-right);
 %     gradient => 4 x 101
-    %     update theta
-    Theta = Theta - taux_dapprentissage * gradient;
-    
-end
 
+% calculer precision ensemble d'apprentissage
+myRes = max(PYsX);
+realRes = full(sum(YA' .* PYsX));
+precisionA = sum(myRes==realRes)./length(myRes);
+fprintf('precision ensemble de''apprentissage : %f\n', precisionA)
+
+% calculer precision ensemble validation
 % calcul de P(Y|X)
 up = exp(Theta*XV); %numerateur
 % Z = denominateur
-
 Z = sum(exp(Theta * XV));
+PYsX = up ./ [Z;Z;Z;Z];
+myRes = max(PYsX);
+realRes = full(sum(YV' .* PYsX));
+precisionV = sum(myRes==realRes)/length(myRes);
+fprintf('precision ensemble de validation : %f\n', precisionV)
+
+    precision = [precisionA precisionV];
+    %     update theta
+    Theta = Theta - taux_dapprentissage * gradient;
+
+    
+    if (abs(oldPrecision(2) - precision(2)) < 0.001),
+        converged = 1
+    end
+   
+    pause
+end
+
+% calcul de P(Y|X)
+up = exp(Theta*XT); %numerateur
+% Z = denominateur
+
+
+Z = sum(exp(Theta * XT));
 PYsX = up ./ [Z;Z;Z;Z];
 
 myRes = max(PYsX);
-realRes = sum(YV' .* PYsX);
+realRes = sum(YT' .* PYsX);
 sum(myRes==realRes)/length(myRes)
