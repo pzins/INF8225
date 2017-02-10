@@ -14,6 +14,27 @@ taux_dapprentissage = 0.0005;
 possibleY = eye(n);
 
 
+% calul de P(Y|X)
+% haut = exp(sum((Y*Theta)' .*X));
+% bas = sum(exp(Theta*X)); 
+% % applique chaque classe (les 4 lg de theta) à toutes les instance X
+% % matrice 4 *16242 avec r chaque instance (chaque col) la valeur obtenue
+% % comme on veut la somme sur Y, on fait juset sum qui va sommer sur les col
+% PYsC = haut./bas
+% now si on veut une ligne pr chaque Y (pas que pr les vrai Y), on calc
+% Theta*X => 4 lg avc ttes les instances (colonnes)
+% ensuite pareil on divise par Z (sauf que là, on divise par [Z;Z;Z;Z] car
+% on a 4 lignes pr les 4 classes
+% bas = sum(exp(Theta*X));
+% res = exp(Theta*X) ./ [Z;Z;Z;Z]
+% en gros ds le premier cas, on a 1 lg avc les classes correspondants à la
+% vérité, et ds le second cas, on a 4 lignes pr chaque classes
+% dc les valeur du premier cas, on les retrouve ds une des lignes du second
+% cas
+
+
+break
+
 [XA, XV, XT, YA, YV, YT] = create_train_valid_test_splits(X, Y);
 
 
@@ -23,9 +44,9 @@ converged = false;
 Z = sum(exp(Theta * XA)); %Teta * X pr faire le produit coeff x instance pr chaque classe
 % on retrouve une matrice 4x16242 avc un score pr chaque classe pr chaque
 % instance puis on somme sur les classes
-left = sum((YA * Theta)' .* XA); %Y*Theta => coeff corrspondant ) la bonne classe à chaque position du Y, on transpose pr avoir 101x16242 comme X
+numerateur = sum((YA * Theta)' .* XA); %Y*Theta => coeff corrspondant ) la bonne classe à chaque position du Y, on transpose pr avoir 101x16242 comme X
 % sum pr avoir pr chaque instance une valeur 
-sum(left-log(Z));
+sum(numerateur-log(Z));
 
 
 
