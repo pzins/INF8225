@@ -33,7 +33,7 @@ possibleY = eye(n);
 % cas
 
 
-break
+
 
 [XA, XV, XT, YA, YV, YT] = create_train_valid_test_splits(X, Y);
 
@@ -53,6 +53,10 @@ sum(numerateur-log(Z));
 
 
 yixi = YA' * XA';
+% matrice 4 x 101
+% pr chaque classe (4 ligne), le nombre de fois qu'on a le feature (101
+% colonnes)
+
 
 % Z = repmat(sum(exp(Theta * X)),4,1);
 % esperance = ((exp(Theta * X)./Z)' )' * X';
@@ -73,8 +77,10 @@ while ~converged
     PYsX = up ./ [Z;Z;Z;Z];
 %     calcul du gradient
     right = PYsX * XA';
+%     pareil que avant (pr left) mais là on fait plus avec les 0 et 1 des
+%     Y, on fait avec les proba de PYsX pr get une esperance
     gradient = -(yixi-right);
-
+%     gradient => 4 x 101
     %     update theta
     Theta = Theta - taux_dapprentissage * gradient;
     
