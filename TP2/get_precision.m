@@ -6,11 +6,12 @@ function [ precision ] = get_precision( X, Y, Theta)
 % calcul de P(Y|X)
 up = exp(Theta*X); %numerateur
 Z = sum(exp(Theta * X)); %denominateur
-P_Y_sachant_X =  up ./ [Z;Z;Z;Z]
+P_Y_sachant_X =  up ./ [Z;Z;Z;Z];
 
-myRes = max(P_Y_sachant_X); %get the probability of the most probable class
-realRes = full(sum(Y' .* P_Y_sachant_X)); %get probability of the real class
-precision = sum(myRes==realRes)./length(myRes); %get the pourcentage of right answer
+
+[myRes, myClass] = max(P_Y_sachant_X); %get the class with the highest probability
+[realRes, realClass] = max(Y'); %real class
+precision = sum(myClass==realClass)./length(myRes); %get the pourcentage of right answer
 
 
 end

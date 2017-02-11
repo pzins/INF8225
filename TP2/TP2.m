@@ -65,16 +65,18 @@ fprintf('precision ensemble de test: %f\n', precisionT);
 %}
 
 % mini-batch
+Theta = rand(4,101) - 0.5;
 converged = false;
-yixi = YA' * XA';
 logV = -10e10;
 precision = -10;
+taux_dapprentissage = 0.0001;
 
+t = 1;
 while ~converged  
     oldLogV = logV
     
     [X_batch, Y_batch] = get_mini_batch(XA, YA, 20)
-    
+    taux_dapprentissage = t;
     for i = 1:size(X_batch,2),
         oldprecision = precision;
         % calcul de la log vraisemblance
@@ -92,19 +94,19 @@ while ~converged
         % update theta
         Theta = Theta + taux_dapprentissage * gradient;
 
-        
+       
         % calculer precision sur le mini batch
-        precision = get_precision(X_batch{i},Y_batch{i}, Theta);
-        fprintf('precision mini batch: %f\n', precision);
+        precision = get_precision(XV,YV, Theta);
+        fprintf('precision ensemble de validation: %f\n', precision);
     
     
         % verification de la condition d'arrêt
         if (abs(oldprecision - precision) < 0.0001),
-            converged = 1
+            converged = 0
         end
     end
     
-
+    t = t + 1;
     pause
 end
 
