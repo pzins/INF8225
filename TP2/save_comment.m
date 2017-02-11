@@ -63,8 +63,8 @@ while ~converged
     oldLogV = logV
     
     % calcul de la log vraisemblance
-    Z = sum(exp(Theta * XA)); %Z (ou partie droite du calcul)
-    left = sum((YA * Theta)' .* XA); %partie gauche du calcul
+    Z = sum(exp(Theta * XA));
+    left = sum((YA * Theta)' .* XA);
     logV = sum(left-log(Z))
     
     
@@ -72,25 +72,34 @@ while ~converged
     % calcul de P(Y|X)
     P_Y_sachant_X = exp(Theta*XA) ./ [Z;Z;Z;Z];
     % calcul du gradient
-    right = P_Y_sachant_X * XA'; %partie droite du calcul
+    right = P_Y_sachant_X * XA';
+%     pareil que avant (pr left) mais là on fait plus avec les 0 et 1 des
+%     Y, on fait avec les proba de P_Y_sachant_X pr get une esperance
     gradient = -(yixi-right);
+%     gradient => 4 x 101
 
+% calculer precision ensemble d'apprentissage
+myRes = max(P_Y_sachant_X);
+realRes = full(sum(YA' .* P_Y_sachant_X));
+precisionA = sum(myRes==realRes)./length(myRes);
+fprintf('precision ensemble de''apprentissage : %f\n', precisionA)
 
-    % calculer precision ensemble d'apprentissage
-    precisionA = compute_precision(XA,YA, Theta);
-    fprintf('precision ensemble de''apprentissage : %f\n', precisionA);
+% calculer precision ensemble validation
+% calcul de P(Y|X)
+up = exp(Theta*XV); %numerateur
+% Z = denominateur
+Z = sum(exp(Theta * XV));
+P_Y_sachant_X = up ./ [Z;Z;Z;Z];
+myRes = max(P_Y_sachant_X);
+realRes = full(sum(YV' .* P_Y_sachant_X));
+precisionV = sum(myRes==realRes)/length(myRes);
+fprintf('precision ensemble de validation : %f\n', precisionV)
 
-    % calculer precision ensemble validation
-    precisionV = compute_precision(XV,YV, Theta);
-    fprintf('precision ensemble de validation : %f\n', precisionV);
-
-    % update precision
     precision = [precisionA precisionV];
-    
-    % update theta
+    %     update theta
     Theta = Theta - taux_dapprentissage * gradient;
+
     
-    % verification de la condition d'arrêt
     if (abs(oldPrecision(2) - precision(2)) < 0.001),
         converged = 1
     end
@@ -98,7 +107,14 @@ while ~converged
     pause
 end
 
-% calculer precision ensemble test
-precisionT = compute_precision(XT,YT, Theta);
-fprintf('precision ensemble de test: %f\n', precisionT);
+% calcul de P(Y|X)
+up = exp(Theta*XT); %numerateur
+% Z = denominateur
 
+
+Z = sum(exp(Theta * XT));
+P_Y_sachant_X = up ./ [Z;Z;Z;Z];
+
+myRes = max(P_Y_sachant_X);
+realRes = sum(YT' .* P_Y_sachant_X);
+sum(myRes==realRes)/length(myRes)
