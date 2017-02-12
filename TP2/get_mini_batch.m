@@ -13,7 +13,7 @@ Y_random = Y(indices,:);
 X_random = X(:,indices);
 
 Y_ = mat2cell(Y_random, tmp, size(Y,2));
-X_ = mat2cell(X_random, size(X,1), tmp)
+X_ = mat2cell(X_random, size(X,1), tmp);
 
 end
 

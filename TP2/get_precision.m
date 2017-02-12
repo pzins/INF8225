@@ -3,10 +3,9 @@ function [ precision ] = get_precision( X, Y, Theta)
 %   Detailed explanation goes here
 
 
-% calcul de P(Y|X)
-up = exp(Theta*X); %numerateur
-Z = sum(exp(Theta * X)); %denominateur
-P_Y_sachant_X =  up ./ [Z;Z;Z;Z];
+% compute de P(Y|X)
+Z = sum(exp(Theta * X)); %denominator
+P_Y_sachant_X = exp(Theta*X) ./ [Z;Z;Z;Z];
 
 
 [myRes, myClass] = max(P_Y_sachant_X); %get the class with the highest probability
