@@ -15,7 +15,7 @@ X = [X; ones(1,16242)];
 Theta_save = rand(4, 101)-0.5;
 Theta = Theta_save;
 
-%{
+
 %BATCH
 taux = [0.0001 0.0005 0.0008]
 
@@ -98,8 +98,7 @@ ylabel('log vraisemblance')
 xlabel('iterations')
 legend('taux = 0.0001', 'taux = 0.0005', 'taux = 0.0008')
 
-break
-%}
+
 
 % MINI_BATCH
 
