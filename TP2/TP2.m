@@ -14,55 +14,64 @@ taux_dapprentissage = 0.0005;
 
 [XA, XV, XT, YA, YV, YT] = create_train_valid_test_splits(X, Y);
 
-%{
 converged = false;
-yixi = YA' * XA';
+
+%initial random values
 logV = -10e10;
-precision = [0 0]
+precisions = [0 0]
+yixi = YA' * XA';
 
 while ~converged  
-    oldLogV = logV
+    oldPrecisions = precisions;
     
-    % calcul de la log vraisemblance
-    Z = sum(exp(Theta * XA)); %Z (ou partie droite du calcul)
-    left = sum((YA * Theta)' .* XA); %partie gauche du calcul
-    logV = sum(left-log(Z))
+    % compute log vraisemblance
+    Z = sum(exp(Theta * XA)); %denominator
+    numerator = sum((YA * Theta)' .* XA);
+    logV = sum(numerator-log(Z));
+    fprintf('\nLog vraisemblance : %f\n', logV),
     
-    
-    oldPrecision = precision;
-    % calcul de P(Y|X)
+    % compute P(Y|X)
     P_Y_sachant_X = exp(Theta*XA) ./ [Z;Z;Z;Z];
-    % calcul du gradient
-    right = P_Y_sachant_X * XA'; %partie droite du calcul
-    gradient = yixi-right;
+    % compute gradient
+    right_part = P_Y_sachant_X * XA'; %right side of the formula
+    gradient = yixi - right_part;
 
-
-    % calculer precision ensemble d'apprentissage
+    % compute training set precision
     precisionA = get_precision(XA,YA, Theta);
     fprintf('precision ensemble de''apprentissage : %f\n', precisionA);
 
-    % calculer precision ensemble validation
+    % compute validation set precision
     precisionV = get_precision(XV,YV, Theta);
-    fprintf('precision ensemble de validation : %f\n', precisionV);
+    fprintf('precision ensemble de validation : %f\n\n', precisionV);
 
     % update precision
-    precision = [precisionA precisionV];
+    precisions = [precisions ; [precisionA precisionV]];
     
     % update theta
     Theta = Theta + taux_dapprentissage * gradient;
     
-    % verification de la condition d'arrêt
-    if (abs(oldPrecision(2) - precision(2)) < 0.001),
+    % check convergence
+    if (abs(oldPrecisions(end,end) - precisions(end,end)) < 0.0001),
         converged = 1
     end
-   
-    pause
+    precisions
+    
+    
 end
 
-% calculer precision ensemble test
+% compute test set precision
 precisionT = get_precision(XT,YT, Theta);
 fprintf('precision ensemble de test: %f\n', precisionT);
-%}
+
+title('Batch : precisions during gradient descent')
+plot(1:length(precisions), precisions)
+ylabel( 'precision')
+xlabel('iterations')
+legend('learning set', 'validation set')
+    
+
+
+break
 
 % mini-batch
 Theta = rand(4,101) - 0.5;
