@@ -15,7 +15,7 @@ X = [X; ones(1,16242)];
 Theta_save = rand(4, 101)-0.5;
 Theta = Theta_save;
 
-
+%{
 %BATCH
 taux = [0.0001 0.0005 0.0008]
 
@@ -62,7 +62,7 @@ for k=1:3,
         Theta = Theta + taux_dapprentissage * gradient;
 
         % check convergence
-        if (abs(oldPrecisions(end,end) - precisions(end,end)) < 0.01),
+        if (abs(oldPrecisions(end,end) - precisions(end,end)) < 0.0001),
             converged = 1;
         end
 
@@ -99,7 +99,7 @@ xlabel('iterations')
 legend('taux = 0.0001', 'taux = 0.0005', 'taux = 0.0008')
 
 break
-
+%}
 
 % MINI_BATCH
 
@@ -110,7 +110,7 @@ mbprecisions_mini_batch = [0 0];
 Theta = Theta_save;
 converged = false;
 NB_mini_batch = 20;
-taux_dapprentissage_factor = 50;
+taux_dapprentissage_factor = 0.5;
 t = 1;
 while ~converged
     
@@ -179,8 +179,8 @@ mbprecisions_mini_batch = [mbprecisions_mini_batch repmat(precisionT, length(mbp
 % graph with precisions
 figure
 plot(1:length(mbprecisions), mbprecisions)
-str = sprintf('Mini-batch : precisions during gradient descent (each epoch), taux : t/%d', taux_dapprentissage_factor)
-title(str)
+str = sprintf('Mini-batch : precisions during gradient descent (each epoch), taux : t/%d', taux_dapprentissage_factor);
+title(str);
 ylabel('precision')
 xlabel('iterations')
 legend('learning set', 'validation set', 'test set')
@@ -188,7 +188,7 @@ legend('learning set', 'validation set', 'test set')
 % graph with log vraisemblance
 figure
 plot(1:length(logV), logV)
-str = sprintf('Mini-batch : log vraisemblance, taux : t/%d', taux_dapprentissage_factor)
+str = sprintf('Mini-batch : log vraisemblance, taux : t/%d', taux_dapprentissage_factor);
 title(str)
 ylabel('log vraisemblance')
 xlabel('iterations')
@@ -196,7 +196,7 @@ xlabel('iterations')
 % graph with precisions_mini_batch
 figure
 plot((1:length(mbprecisions_mini_batch))/20, mbprecisions_mini_batch)
-str = sprintf('Mini-batch : precisions during gradient descent (each iteration in mini-batch) , taux : t/%d', taux_dapprentissage_factor)
+str = sprintf('Mini-batch : precisions during gradient descent (each iteration in mini-batch) , taux : t/%d', taux_dapprentissage_factor);
 title(str)
 ylabel('precision')
 xlabel('iterations')
