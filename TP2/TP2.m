@@ -45,7 +45,7 @@ for k=1:3,
         P_Y_sachant_X = exp(Theta*XA) ./ [Z;Z;Z;Z];
         % compute gradient
         right_part = P_Y_sachant_X * XA'; %right side of the formula
-        gradient = yixi - right_part;
+        gradient = -(yixi - right_part);
 
         % compute training set precision
         precisionA = get_precision(XA,YA, Theta);
@@ -59,7 +59,7 @@ for k=1:3,
         precisions = [precisions ; [precisionA precisionV]];
 
         % update theta
-        Theta = Theta + taux_dapprentissage * gradient;
+        Theta = Theta - taux_dapprentissage * gradient;
 
         % check convergence
         if (abs(oldPrecisions(end,end) - precisions(end,end)) < 0.0001),
@@ -109,15 +109,16 @@ mbprecisions_mini_batch = [0 0];
 Theta = Theta_save;
 converged = false;
 NB_mini_batch = 20;
-taux_dapprentissage_factor = 0.5;
+taux_dapprentissage_factor = 2;
 t = 1;
 while ~converged
     
     %compute mini-batch
     [X_batch, Y_batch] = get_mini_batch(XA, YA, NB_mini_batch);
-    taux_dapprentissage = t/taux_dapprentissage_factor;
+    taux_dapprentissage = t/taux_dapprentissage_factor; %taux dependant simplement de t
+%     taux_dapprentissage = 5/(1+0.001*t); %taux proposé dans le cours
     oldmbprecision = mbprecisions;
-    
+
     for i = 1:size(X_batch,2),
         oldmbprecision_mini_batch = mbprecisions_mini_batch;
         % compute log vraisemblance
@@ -133,10 +134,10 @@ while ~converged
         % compute gradient
         right_part = P_Y_sachant_X * X_batch{:,i}'; %partie droite du calcul
         yixi = Y_batch{i,:}' * X_batch{:,i}'; %not constant for mini-batch (depend on mini-batch)
-        gradient = (yixi-right_part)./size(X_batch{:,i},2);
+        gradient = -(yixi-right_part)./size(X_batch{:,i},2);
 
         % update theta
-        Theta = Theta + taux_dapprentissage * gradient;
+        Theta = Theta - taux_dapprentissage * gradient;
         
         % add precision on learning set
         precisionA = get_precision(XA,YA, Theta);
