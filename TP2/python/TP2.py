@@ -147,3 +147,41 @@ plt.title('Log vraisemblance pendant la descente de gradient par batch')
 g2.show()
 
 plt.show()
+
+
+# MINI BATCH
+def get_mini_batch(X, Y, n):
+    size_data = Y.shape[0]
+    indices = np.arange(size_data)
+    np.random.shuffle(indices)
+    length = np.ceil(size_data/ n)
+    batchsY = np.split(Y, length, 0)
+    batchsX = np.split(X, length, 1)
+
+    Y = Y[indices, :]
+    X = X[:, indices]
+
+    limit = size_data - (size_data % (n-1))
+    x = X.todense()[:,:limit]
+    x = np.hsplit(x, n-1)
+    x.append(X[:,limit:])
+
+    y = Y[:limit,:]
+    y = np.vsplit(y, n-1)
+    y.append(Y[limit:,:])
+
+
+#initial values
+logV = np.array([])
+mbprecisions = np.matrix([0, 0])
+
+Theta = Theta_save
+converged = False
+NB_mini_batch = 20
+taux_dapprentissage = 0.0001
+t = 1
+
+while not converged:
+
+    # compute mini batch
+    converged = True
