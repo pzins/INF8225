@@ -26,7 +26,7 @@ for k=1:3,
     taux_dapprentissage = taux(k);
     converged = false;
     
-    %reset Theta but not random (the same for the three learning rate)
+    %reset theta (the same for the three learning rate)
     Theta = Theta_save;
 
 
@@ -116,7 +116,7 @@ while ~converged
     %compute mini-batch
     [X_batch, Y_batch] = get_mini_batch(XA, YA, NB_mini_batch);
     taux_dapprentissage = t/taux_dapprentissage_factor; %taux dependant simplement de t
-%     taux_dapprentissage = 5/(1+0.001*t); %taux proposé dans le cours
+%     taux_dapprentissage = 5/(1+0.001*t); %taux proposÃ© dans le cours
     oldmbprecision = mbprecisions;
 
     for i = 1:size(X_batch,2),
@@ -158,7 +158,7 @@ while ~converged
     % update precision
     mbprecisions = [mbprecisions ; [precisionA precisionV]];
     
-    % verification de la condition d'arrêt
+    % verification de la condition d'arrÃªt
     if (abs(oldmbprecision(end,end) - mbprecisions(end,end)) < 0.001),
         converged = 1;
     end
