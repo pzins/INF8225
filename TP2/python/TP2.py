@@ -55,22 +55,25 @@ Y = np.array(Y)
 XA, XV, XT, YA, YV, YT = create_train_valid_test_splits(X,Y)
 
 # Initilisation of Theta
-Theta = np.asmatrix(np.random.random((4,101))-0.5)
+save_Theta = np.asmatrix(np.random.random((4,101))-0.5)
+Theta = np.asmatrix(np.copy(save_Theta))
 
 
-'''
 # BATCH
 # initial values
 logV = np.array([0]) # save log likelihood during iterations of gradient descent
 precisions = np.matrix([0, 0]) # save precisions on learning and validation set during gradient descent
 
-taux_dapprentissage = 0.0005
 converged = False
 
-yixi = YA.T * XA.T # left part for the gradient computation, out of the while loop because it is constant
+taux_dapprentissage = 0.0005
 v =  0 # momentum initialisation
 gamma = 0.5 # momentum factor
 lmbda = 0.1 #regularization factor
+
+yixi = YA.T * XA.T # left part for the gradient computation, out of the while loop because it is constant
+
+
 
 while not converged:
 
@@ -88,7 +91,7 @@ while not converged:
     right_part = P_Y_sachant_X * XA.T
 
     # compute gradient with regularization
-    gradient = -np.subtract(yixi, right_part)  + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1])
+    gradient = -np.subtract(yixi, right_part) + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1])
 
     # compute training set precision
     precisionsA = get_precision(XA,YA, Theta)
@@ -105,8 +108,9 @@ while not converged:
     v = gamma*v + taux_dapprentissage * gradient
     Theta = Theta - v
 
+
     # check convergence
-    if abs(oldPrecisions[-1, -1] - precisions[-1, -1]) < 0.0001:
+    if abs(oldPrecisions[-1, -1] - precisions[-1, -1]) < 0.001:
         converged = True
 
 # remove first entry which was only for initialization
@@ -121,28 +125,30 @@ print('Precision sur l\' ensemble de test: %f' %precisionsT)
 
 precisions = np.hstack((precisions, np.full((len(precisions),1), precisionsT)))
 
-plt.figure(1)
-plt.plot(np.arange(len(precisions)), precisions)
-plt.xlabel('itérations')
-plt.ylabel('précision')
-plt.title('Précision de la descente de gradient par batch')
-plt.legend(['learning set', 'validation set', 'test set'], loc=4)
+# plt.figure(1)
+# plt.plot(np.arange(len(precisions)), precisions)
+# plt.xlabel('itérations')
+# plt.ylabel('précision')
+# plt.title('Précision de la descente de gradient par batch')
+# plt.legend(['learning set', 'validation set', 'test set'], loc=4)
+#
+#
+# plt.figure(2)
+# plt.plot(np.arange(len(logV)), logV)
+# plt.xlabel('itérations')
+# plt.ylabel('log-vraisemblance')
+# plt.title('Log vraisemblance pendant la descente de gradient par batch')
+#
+# plt.show()
+#
+#
 
 
-plt.figure(2)
-plt.plot(np.arange(len(logV)), logV)
-plt.xlabel('itérations')
-plt.ylabel('log-vraisemblance')
-plt.title('Log vraisemblance pendant la descente de gradient par batch')
 
-plt.show()
-
-
-
-
-'''
 
 # MINI BATCH
+Theta = save_Theta
+
 
 def get_mini_batch(X, Y, n):
     size_data = Y.shape[0] # number of instance
@@ -182,7 +188,7 @@ NB_mini_batch = 20
 t = 1
 v = 0 # momentum initialisation
 gamma = 0.5 # momentum factor
-lmbda = 0.01 #regularization factor
+lmbda = 0.1 #regularization factor
 
 while not converged:
 
@@ -190,7 +196,7 @@ while not converged:
     X_batchs, Y_batchs = get_mini_batch(XA, YA, NB_mini_batch)
     oldMbPrecisions = mbPrecisions
 
-    taux_dapprentissage = t/2;
+    taux_dapprentissage = 1/(t+1)
 
     # compute log vraisemblance
     Z = np.sum(np.exp(Theta * XA), 0)
@@ -199,7 +205,6 @@ while not converged:
 
     for i in range(NB_mini_batch):
 
-
         # compute P(Y|X)
         Z = np.sum(np.exp(Theta * X_batchs[i]),0)
         P_Y_sachant_X = np.exp(Theta * X_batchs[i]) / np.tile(Z, (4, 1))
@@ -207,7 +212,8 @@ while not converged:
         # compute gradient
         right_part = P_Y_sachant_X * X_batchs[i].T
         yixi = Y_batchs[i].T * X_batchs[i].T
-        gradient = -(np.subtract(yixi, right_part) + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1])) / X_batchs[i].shape[1]
+        gradient = -np.subtract(yixi, right_part) / X_batchs[i].shape[1]
+        # + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1]))
 
         # compute precision on learning set
         precisionA = get_precision(XA, YA, Theta)
@@ -230,7 +236,7 @@ while not converged:
     mbPrecisions = np.vstack((mbPrecisions, [precisionA, precisionV]))
 
     # check convergence
-    if abs(oldMbPrecisions[-1, -1] - mbPrecisions[-1, -1]) < 0.01:
+    if abs(oldMbPrecisions[-1, -1] - mbPrecisions[-1, -1]) < 0.001:
         converged = True
 
     t += 1
@@ -249,7 +255,36 @@ mbPrecisions = np.hstack((mbPrecisions, np.full((len(mbPrecisions),1), precision
 mbPrecisions_mini_batch = np.hstack((mbPrecisions_mini_batch, np.full((len(mbPrecisions_mini_batch),1), precisionsT)))
 
 
+# g1 = plt.figure(1)
+# plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
+# plt.xlabel('itérations')
+# plt.ylabel('précision')
+# plt.title('Précision de la descente de gradient par mini-batch (chaque epoque')
+# plt.legend(['learning set', 'validation set', 'test set'],loc=4)
+# g1.show()
+#
+# g2 = plt.figure(2)
+# plt.plot(np.arange(len(mbPrecisions_mini_batch)), mbPrecisions_mini_batch)
+# plt.xlabel('itérations')
+# plt.ylabel('précision')
+# plt.title('Précision de la descente de gradient par mini-batch (chaque iteration pr chaque mini-batch)')
+# plt.legend(['learning set', 'validation set', 'test set'],loc=4)
+# g2.show()
+#
+# g3 = plt.figure(3)
+# plt.plot(np.arange(len(logV)), logV)
+# plt.xlabel('itérations')
+# plt.ylabel('log-vraisemblance')
+# plt.title('Log vraisemblance pendant la descente de gradient par batch')
+# g3.show()
+#
+# plt.show()
+
+
+
+
 g1 = plt.figure(1)
+plt.plot(np.arange(len(precisions)), precisions, '--',)
 plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
 plt.xlabel('itérations')
 plt.ylabel('précision')
@@ -257,13 +292,6 @@ plt.title('Précision de la descente de gradient par mini-batch (chaque epoque')
 plt.legend(['learning set', 'validation set', 'test set'],loc=4)
 g1.show()
 
-g2 = plt.figure(2)
-plt.plot(np.arange(len(mbPrecisions_mini_batch)), mbPrecisions_mini_batch)
-plt.xlabel('itérations')
-plt.ylabel('précision')
-plt.title('Précision de la descente de gradient par mini-batch (chaque iteration pr chaque mini-batch)')
-plt.legend(['learning set', 'validation set', 'test set'],loc=4)
-g2.show()
 
 g3 = plt.figure(3)
 plt.plot(np.arange(len(logV)), logV)
