@@ -55,10 +55,10 @@ Y = np.array(Y)
 XA, XV, XT, YA, YV, YT = create_train_valid_test_splits(X,Y)
 
 # Initilisation of Theta
-Theta = np.random.random((4,101))-0.5
+Theta = np.asmatrix(np.random.random((4,101))-0.5)
 
 
-
+'''
 # BATCH
 # initial values
 logV = np.array([0]) # save log likelihood during iterations of gradient descent
@@ -69,6 +69,8 @@ converged = False
 
 yixi = YA.T * XA.T # left part for the gradient computation, out of the while loop because it is constant
 v =  0 # momentum initialisation
+gamma = 0.5 # momentum factor
+lmbda = 0.1 #regularization factor
 
 while not converged:
 
@@ -84,9 +86,9 @@ while not converged:
     P_Y_sachant_X = np.exp(Theta * XA) / np.tile(Z, (4,1))
     # compute gradient
     right_part = P_Y_sachant_X * XA.T
-    gradient = -np.subtract(yixi, right_part) # + 0.001 * np.sum(np.multiply(Theta, Theta),0)
-    #pas sûr que ce soit ici qu'il faille mettre la regularzation
 
+    # compute gradient with regularization
+    gradient = -np.subtract(yixi, right_part)  + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1])
 
     # compute training set precision
     precisionsA = get_precision(XA,YA, Theta)
@@ -100,7 +102,7 @@ while not converged:
     precisions = np.vstack((precisions, [precisionsA, precisionsV]))
 
     # update theta with momentum
-    v = 0.5*v + taux_dapprentissage * gradient
+    v = gamma*v + taux_dapprentissage * gradient
     Theta = Theta - v
 
     # check convergence
@@ -178,6 +180,9 @@ mbPrecisions_mini_batch = np.matrix([0, 0]) # precision iteration on each batch
 converged = False
 NB_mini_batch = 20
 t = 1
+v = 0 # momentum initialisation
+gamma = 0.5 # momentum factor
+lmbda = 0.01 #regularization factor
 
 while not converged:
 
@@ -186,22 +191,23 @@ while not converged:
     oldMbPrecisions = mbPrecisions
 
     taux_dapprentissage = t/2;
-    v = 0 # momentum initialisation
+
+    # compute log vraisemblance
+    Z = np.sum(np.exp(Theta * XA), 0)
+    numerator = np.sum(np.multiply(np.dot(YA, Theta).T, XA.todense()), 0)
+    logV = np.vstack((logV, np.sum(np.subtract(numerator, np.log(Z)))))
 
     for i in range(NB_mini_batch):
 
-        # compute log vraisemblance
-        Z = np.sum(np.exp(Theta * X_batchs[i]),0)
-        numerator = np.sum(np.multiply(np.dot(Y_batchs[i],Theta).T, X_batchs[i].todense()), 0)
-        logV = np.vstack((logV, np.sum(np.subtract(numerator, np.log(Z)))))
 
         # compute P(Y|X)
+        Z = np.sum(np.exp(Theta * X_batchs[i]),0)
         P_Y_sachant_X = np.exp(Theta * X_batchs[i]) / np.tile(Z, (4, 1))
 
         # compute gradient
         right_part = P_Y_sachant_X * X_batchs[i].T
         yixi = Y_batchs[i].T * X_batchs[i].T
-        gradient = -np.subtract(yixi, right_part) / X_batchs[i].shape[1]
+        gradient = -(np.subtract(yixi, right_part) + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1])) / X_batchs[i].shape[1]
 
         # compute precision on learning set
         precisionA = get_precision(XA, YA, Theta)
@@ -211,7 +217,7 @@ while not converged:
         mbPrecisions_mini_batch = np.vstack((mbPrecisions_mini_batch, [precisionA, precisionV]))
 
         # update Theta with momentum
-        v = 0.5 * v + taux_dapprentissage * gradient
+        v = gamma * v + taux_dapprentissage * gradient
         Theta = Theta - v
 
     # compute precision on learning set
@@ -267,4 +273,3 @@ plt.title('Log vraisemblance pendant la descente de gradient par batch')
 g3.show()
 
 plt.show()
-'''
