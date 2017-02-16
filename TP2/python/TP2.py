@@ -58,6 +58,7 @@ XA, XV, XT, YA, YV, YT = create_train_valid_test_splits(X,Y)
 Theta = np.random.random((4,101))-0.5
 
 
+
 # BATCH
 # initial values
 logV = np.array([0]) # save log likelihood during iterations of gradient descent
@@ -142,33 +143,37 @@ plt.show()
 # MINI BATCH
 
 def get_mini_batch(X, Y, n):
-    size_data = Y.shape[0]
+    size_data = Y.shape[0] # number of instance
+
+    # shuffle X Y
     indices = np.arange(size_data)
     np.random.shuffle(indices)
-
-
-
     Y = Y[indices, :]
     X = X[:, indices]
 
+    # limit which is divisible by n-1
     limit = size_data - (size_data % (n-1))
+
+    # split into 2 parts (n-1 batchs / the last batch)
     x = X.todense()[:,:limit]
+    # split into n-1 batchs
     x = np.hsplit(x, n-1)
+    # add the last batch (which could be smaller)
     x.append(X[:,limit:].todense())
 
+    # the same for Y
     y = Y[:limit,:]
     y = np.vsplit(y, n-1)
     y.append(Y[limit:,:])
+    x = [sparse.csr_matrix(i) for i in x]
+
     return x,y
 
 
 #initial values
-logV = []
-mbPrecisions = np.matrix([0, 0])
-mbPrecisions_mini_batch = np.matrix([0, 0])
-
-Theta = Theta_save
-
+logV = np.array([0])
+mbPrecisions = np.matrix([0, 0]) # precision epoch iteration
+mbPrecisions_mini_batch = np.matrix([0, 0]) # precision iteration on each batch
 
 converged = False
 NB_mini_batch = 20
@@ -181,15 +186,14 @@ while not converged:
     oldMbPrecisions = mbPrecisions
 
     taux_dapprentissage = t/2;
-    v = 0
+    v = 0 # momentum initialisation
+
     for i in range(NB_mini_batch):
-        print(i)
 
         # compute log vraisemblance
         Z = np.sum(np.exp(Theta * X_batchs[i]),0)
-        numerator = np.sum(np.multiply(np.dot(Y_batchs[i],Theta).T, X_batchs[i]), 0)
-        logV.append(np.sum(np.subtract(numerator, np.log(Z))))
-        # print("Log Vraisemblance = %d" % logV[-1])
+        numerator = np.sum(np.multiply(np.dot(Y_batchs[i],Theta).T, X_batchs[i].todense()), 0)
+        logV = np.vstack((logV, np.sum(np.subtract(numerator, np.log(Z)))))
 
         # compute P(Y|X)
         P_Y_sachant_X = np.exp(Theta * X_batchs[i]) / np.tile(Z, (4, 1))
@@ -197,11 +201,7 @@ while not converged:
         # compute gradient
         right_part = P_Y_sachant_X * X_batchs[i].T
         yixi = Y_batchs[i].T * X_batchs[i].T
-        gradient = -np.subtract(yixi, right_part) / len(X_batchs[i])
-
-        # update Theta
-        v = 0.5*v + taux_dapprentissage*gradient
-        Theta = Theta - v
+        gradient = -np.subtract(yixi, right_part) / X_batchs[i].shape[1]
 
         # compute precision on learning set
         precisionA = get_precision(XA, YA, Theta)
@@ -210,6 +210,9 @@ while not converged:
         precisionV = get_precision(XV, YV, Theta)
         mbPrecisions_mini_batch = np.vstack((mbPrecisions_mini_batch, [precisionA, precisionV]))
 
+        # update Theta with momentum
+        v = 0.5 * v + taux_dapprentissage * gradient
+        Theta = Theta - v
 
     # compute precision on learning set
     precisionA = get_precision(XA, YA, Theta)
@@ -221,7 +224,7 @@ while not converged:
     mbPrecisions = np.vstack((mbPrecisions, [precisionA, precisionV]))
 
     # check convergence
-    if abs(oldMbPrecisions[-1, -1] - mbPrecisions[-1, -1]) <= 0.01:
+    if abs(oldMbPrecisions[-1, -1] - mbPrecisions[-1, -1]) < 0.01:
         converged = True
 
     t += 1
@@ -229,6 +232,7 @@ while not converged:
 # remove first entry which was only for initialization
 mbPrecisions = mbPrecisions[1:,:]
 mbPrecisions_mini_batch = mbPrecisions_mini_batch[1:,:]
+logV = logV[1:,:]
 
 # compute test set precision
 precisionsT = get_precision(XT, YT, Theta)
