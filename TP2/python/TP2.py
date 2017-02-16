@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io as sio
 from scipy.sparse import vstack
-
+from scipy import sparse
 
 def create_train_valid_test_splits(X, Y):
     indices = np.arange(Y.shape[0])
     np.random.shuffle(indices)
-
 
     index = np.floor([0.7*len(indices), 0.85*len(indices)]).astype(int)
     XA = X[:, indices[0:index[0]]]
@@ -17,16 +16,15 @@ def create_train_valid_test_splits(X, Y):
     YA = Y[indices[0:index[0]],:]
     YV = Y[indices[index[0]:index[1]],:]
     YT = Y[indices[index[1]:],:]
-
     return XA, XV, XT, YA, YV, YT
 
 def get_precision(X, Y, Theta):
     # compute P(Y|X)
-    Z = np.sum(np.exp(Theta * X.todense()), 0)
-    P_Y_sachant_X = np.exp(Theta * X.todense()) / np.tile(Z, (4,1))
+    Z = np.sum(np.exp(Theta * X), 0)
+    P_Y_sachant_X = np.exp(Theta * X) / np.tile(Z, (4,1))
     maxi = np.argmax(P_Y_sachant_X, 0)
     maxi_truth = np.argmax(Y.T,0)
-    return np.sum(maxi==maxi_truth)/len(Y)
+    return np.sum(maxi==maxi_truth)/Y.shape[0]
 
 data = sio.loadmat("20news_w100")
 groupnames = data["groupnames"]
@@ -44,52 +42,48 @@ X = documents
 X = vstack((X, np.ones(16242)),"csc")
 
 
+# creation of Y
 j = np.array(j)
-
-n = 4
 m = len(j)
 Y = []
-
-
 for i in range(j.shape[1]):
     Y.append([0]*n)
     Y[i][j[0,i] - 1] = 1
 Y = np.array(Y)
+# Y = sparse.csr_matrix(Y)
 
 XA, XV, XT, YA, YV, YT = create_train_valid_test_splits(X,Y)
 
-Theta_save = np.random.random((4,101))-0.5
-Theta = Theta_save
+# Initilisation of Theta
+Theta = np.random.random((4,101))-0.5
 
-'''
+
 # BATCH
-
 # initial values
-logV = []
-print(type(logV))
-precisions = np.matrix([0, 0])
+logV = np.array([0]) # save log likelihood during iterations of gradient descent
+precisions = np.matrix([0, 0]) # save precisions on learning and validation set during gradient descent
+
 taux_dapprentissage = 0.0005
 converged = False
 
-# reset Theta random (the ame for the three learning rate)
-Theta = Theta_save
-yixi = YA.T * XA.T #left part for the gradient. constant
-v =  0
+yixi = YA.T * XA.T # left part for the gradient computation, out of the while loop because it is constant
+v =  0 # momentum initialisation
+
 while not converged:
 
     oldPrecisions = precisions
 
     # compute log vraisemblance
-    Z = np.sum(np.exp(Theta * XA.todense()),0)
-    numerator = np.sum(np.multiply(np.dot(YA, Theta).T, XA.todense()), 0)
-    logV.append(np.sum(np.subtract(numerator, np.log(Z))))
+    Z = np.sum(np.exp(Theta * XA),0)
+    numerator = np.sum(np.multiply(np.dot(YA,Theta).T, XA.todense()), 0)
+    logV = np.vstack((logV, np.sum(np.subtract(numerator, np.log(Z)))))
     print("Log Vraisemblance = %d" % logV[-1])
 
     # compute P(Y|X)
-    P_Y_sachant_X = np.exp(Theta * XA.todense()) / np.tile(Z, (4,1))
+    P_Y_sachant_X = np.exp(Theta * XA) / np.tile(Z, (4,1))
     # compute gradient
     right_part = P_Y_sachant_X * XA.T
-    gradient = -np.subtract(yixi, right_part) # + 0.05 * np.sum(np.multiply(Theta, Theta),0)
+    gradient = -np.subtract(yixi, right_part) # + 0.001 * np.sum(np.multiply(Theta, Theta),0)
     #pas sûr que ce soit ici qu'il faille mettre la regularzation
 
 
@@ -103,6 +97,7 @@ while not converged:
     print('Precision sur l\'ensemble de validation: %f' %precisionsV)
 
     precisions = np.vstack((precisions, [precisionsA, precisionsV]))
+
     # update theta with momentum
     v = 0.5*v + taux_dapprentissage * gradient
     Theta = Theta - v
@@ -113,6 +108,7 @@ while not converged:
 
 # remove first entry which was only for initialization
 precisions = precisions[1:,:]
+logV = logV[1:,:]
 
 # compute test set precision
 precisionsT = get_precision(XT, YT, Theta)
@@ -137,9 +133,11 @@ plt.ylabel('log-vraisemblance')
 plt.title('Log vraisemblance pendant la descente de gradient par batch')
 
 plt.show()
+
+
+
+
 '''
-
-
 
 # MINI BATCH
 
@@ -265,3 +263,4 @@ plt.title('Log vraisemblance pendant la descente de gradient par batch')
 g3.show()
 
 plt.show()
+'''
