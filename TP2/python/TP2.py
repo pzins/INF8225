@@ -4,6 +4,8 @@ import scipy.io as sio
 from scipy.sparse import vstack
 from scipy import sparse
 
+
+# function which create traning, validation and test sets from data
 def create_train_valid_test_splits(X, Y):
     indices = np.arange(Y.shape[0])
     np.random.shuffle(indices)
@@ -18,6 +20,8 @@ def create_train_valid_test_splits(X, Y):
     YT = Y[indices[index[1]:],:]
     return XA, XV, XT, YA, YV, YT
 
+
+# compute the precision on a set
 def get_precision(X, Y, Theta):
     # compute P(Y|X)
     Z = np.sum(np.exp(Theta * X), 0)
@@ -104,9 +108,12 @@ while not converged:
 
     precisions = np.vstack((precisions, [precisionsA, precisionsV]))
 
-    # update theta with momentum
+    # update Theta with momentum
     v = gamma*v + taux_dapprentissage * gradient
     Theta = Theta - v
+
+    # update Theta without momentum
+    # Theta -= taux_dapprentissage*gradient
 
 
     # check convergence
@@ -125,23 +132,21 @@ print('Precision sur l\' ensemble de test: %f' %precisionsT)
 
 precisions = np.hstack((precisions, np.full((len(precisions),1), precisionsT)))
 
-# plt.figure(1)
-# plt.plot(np.arange(len(precisions)), precisions)
-# plt.xlabel('itérations')
-# plt.ylabel('précision')
-# plt.title('Précision de la descente de gradient par batch')
-# plt.legend(['learning set', 'validation set', 'test set'], loc=4)
-#
-#
-# plt.figure(2)
-# plt.plot(np.arange(len(logV)), logV)
-# plt.xlabel('itérations')
-# plt.ylabel('log-vraisemblance')
-# plt.title('Log vraisemblance pendant la descente de gradient par batch')
-#
-# plt.show()
-#
-#
+plt.figure(1)
+plt.plot(np.arange(len(precisions)), precisions)
+plt.xlabel('itérations')
+plt.ylabel('précision')
+plt.title('Précision de la descente de gradient par batch')
+plt.legend(['learning set', 'validation set', 'test set'], loc=4)
+
+
+plt.figure(2)
+plt.plot(np.arange(len(logV)), logV)
+plt.xlabel('itérations')
+plt.ylabel('log-vraisemblance')
+plt.title('Log vraisemblance pendant la descente de gradient par batch')
+
+plt.show()
 
 
 
@@ -150,6 +155,7 @@ precisions = np.hstack((precisions, np.full((len(precisions),1), precisionsT)))
 Theta = save_Theta
 
 
+# return n mini-batch from input data
 def get_mini_batch(X, Y, n):
     size_data = Y.shape[0] # number of instance
 
@@ -255,36 +261,7 @@ mbPrecisions = np.hstack((mbPrecisions, np.full((len(mbPrecisions),1), precision
 mbPrecisions_mini_batch = np.hstack((mbPrecisions_mini_batch, np.full((len(mbPrecisions_mini_batch),1), precisionsT)))
 
 
-# g1 = plt.figure(1)
-# plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
-# plt.xlabel('itérations')
-# plt.ylabel('précision')
-# plt.title('Précision de la descente de gradient par mini-batch (chaque epoque')
-# plt.legend(['learning set', 'validation set', 'test set'],loc=4)
-# g1.show()
-#
-# g2 = plt.figure(2)
-# plt.plot(np.arange(len(mbPrecisions_mini_batch)), mbPrecisions_mini_batch)
-# plt.xlabel('itérations')
-# plt.ylabel('précision')
-# plt.title('Précision de la descente de gradient par mini-batch (chaque iteration pr chaque mini-batch)')
-# plt.legend(['learning set', 'validation set', 'test set'],loc=4)
-# g2.show()
-#
-# g3 = plt.figure(3)
-# plt.plot(np.arange(len(logV)), logV)
-# plt.xlabel('itérations')
-# plt.ylabel('log-vraisemblance')
-# plt.title('Log vraisemblance pendant la descente de gradient par batch')
-# g3.show()
-#
-# plt.show()
-
-
-
-
 g1 = plt.figure(1)
-plt.plot(np.arange(len(precisions)), precisions, '--',)
 plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
 plt.xlabel('itérations')
 plt.ylabel('précision')
@@ -292,6 +269,13 @@ plt.title('Précision de la descente de gradient par mini-batch (chaque epoque')
 plt.legend(['learning set', 'validation set', 'test set'],loc=4)
 g1.show()
 
+g2 = plt.figure(2)
+plt.plot(np.arange(len(mbPrecisions_mini_batch)), mbPrecisions_mini_batch)
+plt.xlabel('itérations')
+plt.ylabel('précision')
+plt.title('Précision de la descente de gradient par mini-batch (chaque iteration pr chaque mini-batch)')
+plt.legend(['learning set', 'validation set', 'test set'],loc=4)
+g2.show()
 
 g3 = plt.figure(3)
 plt.plot(np.arange(len(logV)), logV)
@@ -301,3 +285,17 @@ plt.title('Log vraisemblance pendant la descente de gradient par batch')
 g3.show()
 
 plt.show()
+
+
+
+# graph : batch and mini-batch precision on the same graph
+# g1 = plt.figure(1)
+# plt.plot(np.arange(len(precisions)), precisions, '--',)
+# plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
+# plt.xlabel('itérations')
+# plt.ylabel('précision')
+# plt.title('Comparaison précisions, batch / mini-batch')
+# plt.legend(['batch : learning set', 'batch : validation set', 'batch : test set', 'mini-batch : learning set', 'mini-batch : validation set', 'mini-batch : test set'],loc=4)
+# g1.show()
+#
+# plt.show()
