@@ -75,14 +75,14 @@ Au travers de ce TP, j'ai pu me familiariser avec l'apprentissage automatique au
 Mon implémentation est décrite en détails aux travers des commentaires dans mon code.
 
 Pour les différentes étapes, j'ai suivi les éléments fournis dans le sujet. \\
-La descente de gradient (ba	tch ou mini-batch) s'arrête lorsque la différence entre la précision sur l'ensemble de validation de deux itérations successives est inférieure à un certain seuil (j'ai fixé ce seuil à 0.001).
+La descente de gradient (par batch ou mini-batch) s'arrête lorsque la différence entre la précision sur l'ensemble de validation de deux itérations successives est inférieure à un certain seuil (j'ai fixé ce seuil à 0.001).
 
 \section{Batch}
 Pour cette version de la descente de gradient, les paramètres sont mis à jour après le calcul du gradient sur l'ensemble d'apprentissage à chaque itération.
 A chaque itération, je la calcule sur l'ensemble d'apprentissage et de validation. Une fois que la descente de gradient a convergé, je calcule la précision finale sur l'ensemble de test.
 
 J'ai pu afficher sur le même graphe, l'évolution des précisions pendant le processus d'optimisation. J'ai également pu faire varier le taux d'apprentissage afin de voir l'impact de ce dernier.
-J'ai affiché les graphes pour trois taux d'apprentissage : 
+ J'ai affiché les graphes pour trois taux d'apprentissage différens : 
 \begin{itemize}
 \item 0.0005 : taux normal de base
 \item 0.001 : pour mesurer l'impact d'un taux plus grand
@@ -128,13 +128,13 @@ Voici maintenant les graphes de la log vraisemblance en fonction du taux d'appre
 \end{center}
 \end{figure}
 
-On remarque que le taux d'apprentissage a un impact important sur la vitesse de l'apprentissage. L'apprentissage va plus vite quand le taux est plus élevé.
+On remarque que le taux d'apprentissage a un impact important sur la vitesse de l'apprentissage. Ce dernier va plus vite quand le taux est plus élevé.
 \begin{itemize}
 \item taux = 0.001 $\Rightarrow$ convergence au bout de 8-10 itérations
 \item taux = 0.0005 $\Rightarrow$ convergence au bout de 10-12 itération
 \item taux = 0.0001 $\Rightarrow$ convergence au bout de 25-30 itérations
 \end{itemize}
-On a donc plutôt intérêt à choisir un taux d'apprentissage relativement élevé. Cependant, cela impacte le bon fonctionnement de la descente de gradient. Un taux trop élevé peut entraîner une divergence, et la précision va décroître sans jamais converger. On peut d'ailleurs remarquer une "réduction" de la précision vers la $4^{eme}$ itération avec le taux le plus grand (0.001). 
+On a donc plutôt intérêt à choisir un taux d'apprentissage relativement élevé. Cependant, cela impacte le bon fonctionnement de la descente de gradient. Un taux trop élevé peut entraîner une divergence, et la précision va décroître sans jamais converger. On peut d'ailleurs remarquer une "réduction" de la précision vers la $4^{eme}$ itération sur le graphe avec le taux d'apprentissage le plus grand (0.001). Ce phénomène n'est pas visible sur les autres graphes ayant un taux plus faible.
 \\ \linebreak
 Par ailleurs, les graphes ont été réalisés avec des paramètres \textit{Theta} et des ensembles de test, validation et apprentissage initialisés différemment. Il est donc compréhensible d'avoir des valeurs finales de précision ou de log-vraisemblance différentes. Théoriquement, avec la même initialisation, un taux d'apprentissage plus faible devrait permettre de mieux minimiser la fonction de perte, et donc offrir une meilleure précision.
 \\
@@ -165,11 +165,11 @@ En ajoutant le momentum, ces oscillations vont disparaîtres. La précision fina
 Pour la version par mini-batch, l'ensemble d'apprentissage est découpé en plusieurs "mini-batchs" différents (20 dans ce TP). Dans ce cas, la mise à jour des paramètres Theta se fait plus régulièrement, à chaque traitement d'un mini-batch. 
 
 J'ai pu calculer la précision sur les ensembles d'apprentissage et de validation durant la descente de gradient et la précision sur l'ensemble de test une fois le processus terminé. J'ai pu différencier, une mesure à chaque itération pour chaque mini-batch (boucle intérieure sur les mini-batch) et une mesure à chaque époque (boucle extérieure). Le premier cas propose une meilleure précision, puisque nous réalisons beaucoup plus de mesures, mais globalement il s'agit des même résultats.
-J'ai également mesuré la vraisemblance, à chaque époque.\\
+J'ai également mesuré la log-vraisemblance, à chaque époque.\\
 
-Concernant le taux d'apprentissage, je n'ai pas pris une valeur constante comme dans le cas précédent. Pour la version par mini-batch, il est conseillé d'avoir un taux d'apprentissage qui dépend du "temps" (des itérations dans le processus d'optimisation). Il est avantageux d'avoir un taux relativement grand au départ et plus petit par la suite. Voici le taux que j'ai choisi : 
-\[\frac{C1}{t+C2}\]
-De cette manière, le taux aura une valeur initiale puis va progressivement diminuer. J'ai fait des mesures pour deux taux différents. Pour le premier cas, j'ai $C1 = 1 et C2 = 1$ et pour le second $C1 = 5 et C2 = 1$. Ainsi le second taux est aura une valeur supérieure au premier pour tout t.
+Concernant le taux d'apprentissage, je n'ai pas pris une valeur constante comme dans le cas précédent. Pour la version par mini-batch, il est conseillé d'avoir un taux d'apprentissage qui dépend du "temps" (les itérations dans le processus d'optimisation). Il est avantageux d'avoir un taux relativement grand au départ et plus petit par la suite. Voici le taux que j'ai choisi : 
+\[\frac{C_1}{t+C_2}\]
+De cette manière, le taux aura une valeur initiale puis va progressivement diminuer. J'ai fait des mesures pour deux taux différents. Pour le premier cas, j'ai $C_1 = 1$ et $C_2 = 1$ et pour le second $C_1 = 5$ et$ C_2 = 1$. Ainsi le second taux est aura une valeur supérieure au premier pour tout t.
 Pour les deux cas, j'affiche la précision mesurée à chaque époque, la précision mesurée à chaque mini-batch et la log-vraisemblance.
 
 \begin{figure}[H]
@@ -210,10 +210,11 @@ Pour les deux cas, j'affiche la précision mesurée à chaque époque, la préci
 \end{figure}
 
 
-On voit donc que le taux d'apprentissage a le même impact que pour la version par "batch". Avec un taux plus grand, la descente de gradient se fait plus vite (3-4 itérations contre 10 itérations).
+On voit donc que le taux d'apprentissage a le même impact que pour la version par "batch". Avec un taux plus grand, la descente de gradient se fait plus vite (3-4 itérations contre 10 itérations). Cependant un taux élevé va réduire la fluidité de la descente de gradient (on remarque bien les "variations", "creux" sur le graphe pour le taux le plus élevé). Si le taux est trop grand la descente de gradient par mini-batch ne convergera pas.
 
-A nouveau, les valeurs finales pour la précision sont différentes mais il n'est pas possible de conclure sur quelque chose à ce niveau là. J'ai aussi utilisé un terme de régularisation afin de réduire la possibilité de sur-apprentissage, ainsi qu'un \textit{momentum} pour fluidifier l'optimisation. Le seuil utilisé pour la détection d'une convergence reste le même, c'est à dire 0.001. 
-\\ \linebreak
+A nouveau, les valeurs finales pour la précision sont différentes mais il n'est pas possible de conclure sur quelque chose à ce niveau là. J'ai aussi utilisé un terme de \textit{égularisation} afin de réduire la possibilité de sur-apprentissage, ainsi qu'un \textit{momentum} pour fluidifier l'optimisation. Le seuil utilisé pour la détection d'une convergence reste le même, c'est à dire 0.001. 
+
+\section{Comparaison Batch / Mini-batch}
 Enfin, pour comparer les deux versions de la descente de gradient, j'affiche un graphe présentant la précision sur les trois ensembles dans les 2 cas. J'ai repris des taux d'apprentissage moyen : taux = 0.0005 et taux = $\frac{1}{t+1}$
 
 \begin{figure}[H]
