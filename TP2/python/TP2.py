@@ -54,7 +54,6 @@ for i in range(j.shape[1]):
     Y.append([0]*n)
     Y[i][j[0,i] - 1] = 1
 Y = np.array(Y)
-# Y = sparse.csr_matrix(Y)
 
 XA, XV, XT, YA, YV, YT = create_train_valid_test_splits(X,Y)
 
@@ -194,7 +193,7 @@ NB_mini_batch = 20
 t = 1
 v = 0 # momentum initialisation
 gamma = 0.5 # momentum factor
-lmbda = 0.1 #regularization factor
+lmbda = 0.0001 #regularization factor
 
 while not converged:
 
@@ -219,7 +218,8 @@ while not converged:
         right_part = P_Y_sachant_X * X_batchs[i].T
         yixi = Y_batchs[i].T * X_batchs[i].T
         gradient = -np.subtract(yixi, right_part) / X_batchs[i].shape[1]
-        # + np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1]))
+        # if regularization add
+        # + (np.tile(lmbda * np.sum(Theta, 1), Theta.shape[1]))
 
         # compute precision on learning set
         precisionA = get_precision(XA, YA, Theta)
@@ -288,14 +288,14 @@ plt.show()
 
 
 
-# graph : batch and mini-batch precision on the same graph
-# g1 = plt.figure(1)
-# plt.plot(np.arange(len(precisions)), precisions, '--',)
-# plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
-# plt.xlabel('itérations')
-# plt.ylabel('précision')
-# plt.title('Comparaison précisions, batch / mini-batch')
-# plt.legend(['batch : learning set', 'batch : validation set', 'batch : test set', 'mini-batch : learning set', 'mini-batch : validation set', 'mini-batch : test set'],loc=4)
-# g1.show()
-#
-# plt.show()
+# comparative graph : batch and mini-batch precision on the same graph
+g1 = plt.figure(1)
+plt.plot(np.arange(len(precisions)), precisions, '--',)
+plt.plot(np.arange(len(mbPrecisions)), mbPrecisions)
+plt.xlabel('itérations')
+plt.ylabel('précision')
+plt.title('Comparaison précisions, batch / mini-batch')
+plt.legend(['batch : learning set', 'batch : validation set', 'batch : test set', 'mini-batch : learning set', 'mini-batch : validation set', 'mini-batch : test set'],loc=4)
+g1.show()
+
+plt.show()
