@@ -1,3 +1,4 @@
 *.asv
 *.pkl
-
+*.pkl.gz
+*.gz
