@@ -125,7 +125,7 @@ class MLP(object):
         """
 
         # Since we are dealing with a one hidden layer MLP, this will translate
-        # into a HiddenLayer with a tanh activation function connected to the
+        # into a HiddenLayer with a relu activation function connected to the
         # LogisticRegression layer; the activation function can be replaced by
         # sigmoid or any other nonlinear function
         self.hiddenLayer = HiddenLayer(
@@ -133,7 +133,7 @@ class MLP(object):
             input=input,
             n_in=n_in,
             n_out=n_hidden,
-            activation=T.tanh
+            activation=T.nnet.relu
         )
 
         # The logistic regression layer gets as input the hidden units
@@ -143,13 +143,7 @@ class MLP(object):
             n_in=n_hidden,
             n_out=n_out
         )
-        # end-snippet-2 start-snippet-3
-        # L1 norm ; one regularization option is to enforce L1 norm to
-        # be small
-        self.L1 = (
-            abs(self.hiddenLayer.W).sum()
-            + abs(self.logRegressionLayer.W).sum()
-        )
+  
 
         # square of L2 norm ; one regularization option is to enforce
         # square of L2 norm to be small
@@ -176,7 +170,7 @@ class MLP(object):
         self.input = input
 
 
-def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
+def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
              dataset='mnist.pkl.gz', batch_size=20, n_hidden=500):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
@@ -188,9 +182,6 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     :param learning_rate: learning rate used (factor for the stochastic
     gradient
 
-    :type L1_reg: float
-    :param L1_reg: L1-norm's weight when added to the cost (see
-    regularization)
 
     :type L2_reg: float
     :param L2_reg: L2-norm's weight when added to the cost (see
@@ -240,11 +231,10 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
-    # the model plus the regularization terms (L1 and L2); cost is expressed
+    # the model plus the regularization terms (L2); cost is expressed
     # here symbolically
     cost = (
         classifier.negative_log_likelihood(y)
-        + L1_reg * classifier.L1
         + L2_reg * classifier.L2_sqr
     )
     # end-snippet-4
@@ -385,5 +375,5 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.01, 0.00, 0.0001, 1000, 'mnist.pkl.gz', 20, 500)
-    # params : learning_rate, L1_reg, L2_reg, n_epochs, dataset, batch_size, n_hidden
+    test_mlp(0.01, 0.0001, 1000, 'mnist.pkl.gz', 20, 500)
+    # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
