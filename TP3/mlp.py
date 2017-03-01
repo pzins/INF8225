@@ -101,7 +101,7 @@ class MLP(object):
     class).
     """
 
-    def __init__(self, rng, input, n_in, n_hidden, n_out):
+    def __init__(self, rng, input, n_in, n_hidden, n_out, nb_layer):
         """Initialize the parameters for the multilayer perceptron
 
         :type rng: numpy.random.RandomState
@@ -226,7 +226,8 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         input=x,
         n_in=28 * 28,
         n_hidden=n_hidden,
-        n_out=10
+        n_out=10,
+        nb_layer = 1
     )
 
     # start-snippet-4
