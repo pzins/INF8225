@@ -1,37 +1,3 @@
-"""
-This tutorial introduces logistic regression using Theano and stochastic
-gradient descent.
-
-Logistic regression is a probabilistic, linear classifier. It is parametrized
-by a weight matrix :math:`W` and a bias vector :math:`b`. Classification is
-done by projecting data points onto a set of hyperplanes, the distance to
-which is used to determine a class membership probability.
-
-Mathematically, this can be written as:
-
-.. math::
-  P(Y=i|x, W,b) &= softmax_i(W x + b) \\
-                &= \frac {e^{W_i x + b_i}} {\sum_j e^{W_j x + b_j}}
-
-
-The output of the model or prediction is then done by taking the argmax of
-the vector whose i'th element is P(Y=i|x).
-
-.. math::
-
-  y_{pred} = argmax_i P(Y=i|x,W,b)
-
-
-This tutorial presents a stochastic gradient descent optimization method
-suitable for large datasets.
-
-
-References:
-
-    - textbooks: "Pattern Recognition and Machine Learning" -
-                 Christopher M. Bishop, section 4.3.2
-
-"""
 
 from __future__ import print_function
 
@@ -43,20 +9,14 @@ import os
 import sys
 import timeit
 
-import numpy
+import numpy as np
 
 import theano
 import theano.tensor as T
 
 
 class LogisticRegression(object):
-    """Multi-class Logistic Regression Class
-
-    The logistic regression is fully described by a weight matrix :math:`W`
-    and bias vector :math:`b`. Classification is done by projecting data
-    points onto a set of hyperplanes, the distance to which is used to
-    determine a class membership probability.
-    """
+    """Multi-class Logistic Regression Class    """
 
     def __init__(self, input, n_in, n_out):
         """ Initialize the parameters of the logistic regression
@@ -77,7 +37,7 @@ class LogisticRegression(object):
         # start-snippet-1
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
         self.W = theano.shared(
-            value=numpy.zeros(
+            value=np.zeros(
                 (n_in, n_out),
                 dtype=theano.config.floatX
             ),
@@ -86,7 +46,7 @@ class LogisticRegression(object):
         )
         # initialize the biases b as a vector of n_out 0s
         self.b = theano.shared(
-            value=numpy.zeros(
+            value=np.zeros(
                 (n_out,),
                 dtype=theano.config.floatX
             ),
@@ -107,7 +67,6 @@ class LogisticRegression(object):
         # symbolic description of how to compute prediction as class whose
         # probability is maximal
         self.y_pred = T.argmax(self.p_y_given_x, axis=1)
-        # end-snippet-1
 
         # parameters of the model
         self.params = [self.W, self.b]
@@ -117,14 +76,7 @@ class LogisticRegression(object):
 
     def negative_log_likelihood(self, y):
         """Return the mean of the negative log-likelihood of the prediction
-        of this model under a given target distribution.
-
-        .. math::
-
-            \frac{1}{|\mathcal{D}|} \mathcal{L} (\theta=\{W,b\}, \mathcal{D}) =
-            \frac{1}{|\mathcal{D}|} \sum_{i=0}^{|\mathcal{D}|}
-                \log(P(Y=y^{(i)}|x^{(i)}, W,b)) \\
-            \ell (\theta=\{W,b\}, \mathcal{D})
+        of this model under a given target distribution
 
         :type y: theano.tensor.TensorType
         :param y: corresponds to a vector that gives for each example the
@@ -145,7 +97,8 @@ class LogisticRegression(object):
         # the mean (across minibatch examples) of the elements in v,
         # i.e., the mean log-likelihood across the minibatch.
         return -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
-        # end-snippet-2
+
+
 
     def errors(self, y):
         """Return a float representing the number of errors in the minibatch
@@ -171,6 +124,31 @@ class LogisticRegression(object):
         else:
             raise NotImplementedError()
 
+
+def shared_dataset(data_xy, borrow=True):
+    """ Function that loads the dataset into shared variables
+
+    The reason we store our dataset in shared variables is to allow
+    Theano to copy it into the GPU memory (when code is run on GPU).
+    Since copying data into the GPU is slow, copying a minibatch everytime
+    is needed (the default behaviour if the data is not in a shared
+    variable) would lead to a large decrease in performance.
+    """
+    data_x, data_y = data_xy
+    shared_x = theano.shared(np.asarray(data_x,
+                                           dtype=theano.config.floatX),
+                             borrow=borrow)
+    shared_y = theano.shared(np.asarray(data_y,
+                                           dtype=theano.config.floatX),
+                             borrow=borrow)
+    # When storing data on the GPU it has to be stored as floats
+    # therefore we will store the labels as ``floatX`` as well
+    # (``shared_y`` does exactly that). But during our computations
+    # we need them as ints (we use labels as index, and if they are
+    # floats it doesn't make sense) therefore instead of returning
+    # ``shared_y`` we will have to cast it to int. This little hack
+    # lets ous get around this issue
+    return shared_x, T.cast(shared_y, 'int32')
 
 def load_data(dataset):
     ''' Loads the dataset
@@ -218,31 +196,6 @@ def load_data(dataset):
     # numpy.ndarray of 1 dimension (vector) that has the same length as
     # the number of rows in the input. It should give the target
     # to the example with the same index in the input.
-
-    def shared_dataset(data_xy, borrow=True):
-        """ Function that loads the dataset into shared variables
-
-        The reason we store our dataset in shared variables is to allow
-        Theano to copy it into the GPU memory (when code is run on GPU).
-        Since copying data into the GPU is slow, copying a minibatch everytime
-        is needed (the default behaviour if the data is not in a shared
-        variable) would lead to a large decrease in performance.
-        """
-        data_x, data_y = data_xy
-        shared_x = theano.shared(numpy.asarray(data_x,
-                                               dtype=theano.config.floatX),
-                                 borrow=borrow)
-        shared_y = theano.shared(numpy.asarray(data_y,
-                                               dtype=theano.config.floatX),
-                                 borrow=borrow)
-        # When storing data on the GPU it has to be stored as floats
-        # therefore we will store the labels as ``floatX`` as well
-        # (``shared_y`` does exactly that). But during our computations
-        # we need them as ints (we use labels as index, and if they are
-        # floats it doesn't make sense) therefore instead of returning
-        # ``shared_y`` we will have to cast it to int. This little hack
-        # lets ous get around this issue
-        return shared_x, T.cast(shared_y, 'int32')
 
     test_set_x, test_set_y = shared_dataset(test_set)
     valid_set_x, valid_set_y = shared_dataset(valid_set)
@@ -366,7 +319,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                                   # on the validation set; in this case we
                                   # check every epoch
 
-    best_validation_loss = numpy.inf
+    best_validation_loss = np.inf
     test_score = 0.
     start_time = timeit.default_timer()
 
@@ -384,7 +337,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                 # compute zero-one loss on validation set
                 validation_losses = [validate_model(i)
                                      for i in range(n_valid_batches)]
-                this_validation_loss = numpy.mean(validation_losses)
+                this_validation_loss = np.mean(validation_losses)
 
                 print(
                     'epoch %i, minibatch %i/%i, validation error %f %%' %
@@ -399,8 +352,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                 # if we got the best validation score until now
                 if this_validation_loss < best_validation_loss:
                     #improve patience if loss improvement is good enough
-                    if this_validation_loss < best_validation_loss *  \
-                       improvement_threshold:
+                    if this_validation_loss < best_validation_loss * improvement_threshold:
                         patience = max(patience, iter * patience_increase)
 
                     best_validation_loss = this_validation_loss
@@ -408,7 +360,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
                     test_losses = [test_model(i)
                                    for i in range(n_test_batches)]
-                    test_score = numpy.mean(test_losses)
+                    test_score = np.mean(test_losses)
 
                     print(
                         (
@@ -472,5 +424,5 @@ def predict():
 
 
 if __name__ == '__main__':
-    # sgd_optimization_mnist()
-    predict()
+    sgd_optimization_mnist(0.14, 10000, 'mnist.pkl.gz', 60)
+    # params : learning_rate, n_epochs, dataset, batch_size=600

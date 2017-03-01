@@ -1,24 +1,3 @@
-"""
-This tutorial introduces the multilayer perceptron using Theano.
-ol
- A multilayer perceptron is a logistic regressor where
-instead of feeding the input to the logistic regression you insert a
-intermediate layer, called the hidden layer, that has a nonlinear
-activation function (usually tanh or sigmoid) . One can use many such
-hidden layers making the architecture deep. The tutorial will also tackle
-the problem of MNIST digit classification.
-
-.. math::
-
-    f(x) = G( b^{(2)} + W^{(2)}( s( b^{(1)} + W^{(1)} x))),
-
-References:
-
-    - textbooks: "Pattern Recognition and Machine Learning" -
-                 Christopher M. Bishop, section 5
-
-"""
-
 from __future__ import print_function
 
 __docformat__ = 'restructedtext en'
@@ -27,13 +6,13 @@ import os
 import sys
 import timeit
 
-import numpy
+import numpy as np
 
 import theano
 import theano.tensor as T
 
 
-from logistic_sgd import LogisticRegression, load_data
+from logreg import LogisticRegression, load_data
 
 
 # start-snippet-1
@@ -69,7 +48,7 @@ class HiddenLayer(object):
         # end-snippet-1
 
         # `W` is initialized with `W_values` which is uniformely sampled
-        # from sqrt(-6./(n_in+n_hidden)) and sqrt(6./(n_in+n_hidden))
+        # from -2/n_in and 2/n_in
         # for tanh activation function
         # the output of uniform if converted using asarray to dtype
         # theano.config.floatX so that the code is runable on GPU
@@ -81,10 +60,10 @@ class HiddenLayer(object):
         #        We have no info for other function, so we use the same as
         #        tanh.
         if W is None:
-            W_values = numpy.asarray(
+            W_values = np.asarray(
                 rng.uniform(
-                    low=-numpy.sqrt(6. / (n_in + n_out)),
-                    high=numpy.sqrt(6. / (n_in + n_out)),
+                    low=-2 / n_in,
+                    high=2 / n_in,
                     size=(n_in, n_out)
                 ),
                 dtype=theano.config.floatX
@@ -95,7 +74,7 @@ class HiddenLayer(object):
             W = theano.shared(value=W_values, name='W', borrow=True)
 
         if b is None:
-            b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
+            b_values = np.zeros((n_out,), dtype=theano.config.floatX)
             b = theano.shared(value=b_values, name='b', borrow=True)
 
         self.W = W
@@ -248,7 +227,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     y = T.ivector('y')  # the labels are presented as 1D vector of
                         # [int] labels
 
-    rng = numpy.random.RandomState(1234)
+    rng = np.random.RandomState(1234)
 
     # construct the MLP class
     classifier = MLP(
@@ -338,7 +317,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
                                   # on the validation set; in this case we
                                   # check every epoch
 
-    best_validation_loss = numpy.inf
+    best_validation_loss = np.inf
     best_iter = 0
     test_score = 0.
     start_time = timeit.default_timer()
@@ -349,7 +328,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
         for minibatch_index in range(n_train_batches):
-
+            # learning_rate = epoch
             minibatch_avg_cost = train_model(minibatch_index)
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
@@ -358,7 +337,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
                 # compute zero-one loss on validation set
                 validation_losses = [validate_model(i) for i
                                      in range(n_valid_batches)]
-                this_validation_loss = numpy.mean(validation_losses)
+                this_validation_loss = np.mean(validation_losses)
 
                 print(
                     'epoch %i, minibatch %i/%i, validation error %f %%' %
@@ -385,7 +364,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
                     # test it on the test set
                     test_losses = [test_model(i) for i
                                    in range(n_test_batches)]
-                    test_score = numpy.mean(test_losses)
+                    test_score = np.mean(test_losses)
 
                     print(('     epoch %i, minibatch %i/%i, test error of '
                            'best model %f %%') %
@@ -406,4 +385,5 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp()
+    test_mlp(0.01, 0.00, 0.0001, 1000, 'mnist.pkl.gz', 20, 500)
+    # params : learning_rate, L1_reg, L2_reg, n_epochs, dataset, batch_size, n_hidden
