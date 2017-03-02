@@ -136,18 +136,21 @@ class MLP(object):
             activation=T.nnet.relu
         )
 
-        self.hiddenLayer2 = HiddenLayer(
-            rng=rng,
-            input=self.hiddenLayer.output,
-            n_in=n_hidden,
-            n_out=n_hidden,
-            activation=T.nnet.relu
-        )
+        self.hiddenLayers = [self.hiddenLayer]
+        for i in range(nb_layer-1):
+            self.hiddenLayers.append(
+            HiddenLayer(
+                rng=rng,
+                input=self.hiddenLayers[-1].output,
+                n_in=n_hidden,
+                n_out=n_hidden,
+                activation=T.nnet.relu
+            ))
 
         # The logistic regression layer gets as input the hidden units
         # of the hidden layer
         self.logRegressionLayer = LogisticRegression(
-            input=self.hiddenLayer2.output,
+            input=self.hiddenLayers[-1].output,
             n_in=n_hidden,
             n_out=n_out
         )
@@ -156,11 +159,12 @@ class MLP(object):
         # square of L2 norm ; one regularization option is to enforce
         # square of L2 norm to be small
         self.L2_sqr = (
-            (self.hiddenLayer.W ** 2).sum()
-            + (self.hiddenLayer2.W ** 2).sum()
+            # (self.hiddenLayer.W ** 2).sum()
+            sum((i.W ** 2).sum() for i in self.hiddenLayers)
             + (self.logRegressionLayer.W ** 2).sum()
         )
-
+        print(self.L2_sqr)
+        print(type(self.L2_sqr))
         # negative log likelihood of the MLP is given by the negative
         # log likelihood of the output of the model, computed in the
         # logistic regression layer
@@ -172,7 +176,12 @@ class MLP(object):
 
         # the parameters of the model are the parameters of the two layer it is
         # made out of
-        self.params = self.hiddenLayer.params + self.hiddenLayer2.params + self.logRegressionLayer.params
+        self.params=[]
+        for i in self.hiddenLayers:
+            self.params += i.params
+        self.params += self.logRegressionLayer.params
+        print(self.params)
+        # self.params = self.hiddenLayer.params + self.hiddenLayer2.params + self.logRegressionLayer.params
         # end-snippet-3
 
         # keep track of model input
@@ -236,7 +245,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 1
+        nb_layer = 5
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -324,7 +333,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     epoch = 0
     done_looping = False
 
-    while (epoch < n_epochs) and (not done_looping):
+    while (epoch < n_epochs):# and (not done_looping):
         epoch = epoch + 1
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
@@ -372,8 +381,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
             if patience <= iter:
                 done_looping = True
-                break
-
+                # break
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
@@ -384,5 +392,5 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.01, 0.0001, 500, 'mnist.pkl.gz', 200, 20)
+    test_mlp(0.01, 0.0001, 500, 'mnist.pkl.gz', 20, 200)
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
