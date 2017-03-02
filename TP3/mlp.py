@@ -136,10 +136,18 @@ class MLP(object):
             activation=T.nnet.relu
         )
 
+        self.hiddenLayer2 = HiddenLayer(
+            rng=rng,
+            input=self.hiddenLayer.output,
+            n_in=n_hidden,
+            n_out=n_hidden,
+            activation=T.nnet.relu
+        )
+
         # The logistic regression layer gets as input the hidden units
         # of the hidden layer
         self.logRegressionLayer = LogisticRegression(
-            input=self.hiddenLayer.output,
+            input=self.hiddenLayer2.output,
             n_in=n_hidden,
             n_out=n_out
         )
@@ -149,6 +157,7 @@ class MLP(object):
         # square of L2 norm to be small
         self.L2_sqr = (
             (self.hiddenLayer.W ** 2).sum()
+            + (self.hiddenLayer2.W ** 2).sum()
             + (self.logRegressionLayer.W ** 2).sum()
         )
 
@@ -163,7 +172,7 @@ class MLP(object):
 
         # the parameters of the model are the parameters of the two layer it is
         # made out of
-        self.params = self.hiddenLayer.params + self.logRegressionLayer.params
+        self.params = self.hiddenLayer.params + self.hiddenLayer2.params + self.logRegressionLayer.params
         # end-snippet-3
 
         # keep track of model input
@@ -229,7 +238,6 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_out=10,
         nb_layer = 1
     )
-
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
     # the model plus the regularization terms (L2); cost is expressed
@@ -376,5 +384,5 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.01, 0.0001, 1000, 'mnist.pkl.gz', 20, 500)
+    test_mlp(0.01, 0.0001, 500, 'mnist.pkl.gz', 200, 20)
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
