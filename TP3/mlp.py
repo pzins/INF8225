@@ -214,6 +214,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
 
+    print(train_set_x)
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
     n_valid_batches = valid_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -374,9 +375,9 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
                           (epoch, minibatch_index + 1, n_train_batches,
                            test_score * 100.))
 
-            # if patience <= iter:
-            #     done_looping = True
-            #     break
+            if patience <= iter:
+                done_looping = True
+                break
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
