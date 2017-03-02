@@ -159,7 +159,6 @@ class MLP(object):
         # square of L2 norm ; one regularization option is to enforce
         # square of L2 norm to be small
         self.L2_sqr = (
-            # (self.hiddenLayer.W ** 2).sum()
             sum((i.W ** 2).sum() for i in self.hiddenLayers)
             + (self.logRegressionLayer.W ** 2).sum()
         )
@@ -178,9 +177,6 @@ class MLP(object):
         for i in self.hiddenLayers:
             self.params += i.params
         self.params += self.logRegressionLayer.params
-        print(self.params)
-        # self.params = self.hiddenLayer.params + self.hiddenLayer2.params + self.logRegressionLayer.params
-        # end-snippet-3
 
         # keep track of model input
         self.input = input
@@ -332,14 +328,11 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
-        # print(classifier.params[-2])
-        # print(classifier.params[-2].get_value())
-        # print(classifier.logRegressionLayer.input.get_value())
+
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
             minibatch_avg_cost = train_model(minibatch_index)
-            # print(minibatch_avg_cost)
-            # print(updates)
+
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
 
