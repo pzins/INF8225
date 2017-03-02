@@ -163,8 +163,6 @@ class MLP(object):
             sum((i.W ** 2).sum() for i in self.hiddenLayers)
             + (self.logRegressionLayer.W ** 2).sum()
         )
-        print(self.L2_sqr)
-        print(type(self.L2_sqr))
         # negative log likelihood of the MLP is given by the negative
         # log likelihood of the output of the model, computed in the
         # logistic regression layer
@@ -174,7 +172,7 @@ class MLP(object):
         # same holds for the function computing the number of errors
         self.errors = self.logRegressionLayer.errors
 
-        # the parameters of the model are the parameters of the two layer it is
+        # the parameters of the model are the parameters of the n layer it is
         # made out of
         self.params=[]
         for i in self.hiddenLayers:
@@ -245,7 +243,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 5
+        nb_layer = 2
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -253,7 +251,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     # here symbolically
     cost = (
         classifier.negative_log_likelihood(y)
-        + L2_reg * classifier.L2_sqr
+       + L2_reg * classifier.L2_sqr
     )
     # end-snippet-4
 
@@ -281,7 +279,6 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     # compute the gradient of cost with respect to theta (sorted in params)
     # the resulting gradients will be stored in a list gparams
     gparams = [T.grad(cost, param) for param in classifier.params]
-
     # specify how to update the parameters of the model as a list of
     # (variable, update expression) pairs
 
@@ -335,9 +332,14 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
+        # print(classifier.params[-2])
+        # print(classifier.params[-2].get_value())
+        # print(classifier.logRegressionLayer.input.get_value())
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
             minibatch_avg_cost = train_model(minibatch_index)
+            # print(minibatch_avg_cost)
+            # print(updates)
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
 
@@ -379,9 +381,9 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
                           (epoch, minibatch_index + 1, n_train_batches,
                            test_score * 100.))
 
-            if patience <= iter:
-                done_looping = True
-                break
+            # if patience <= iter:
+            #     done_looping = True
+            #     break
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
@@ -392,5 +394,5 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.01, 0.0001, 500, 'mnist.pkl.gz', 20, 200)
+    test_mlp(0.1, 0.0001, 30, 'mnist.pkl.gz', 10, 30)
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
