@@ -333,7 +333,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     epoch = 0
     done_looping = False
 
-    while (epoch < n_epochs):# and (not done_looping):
+    while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
@@ -381,7 +381,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
             if patience <= iter:
                 done_looping = True
-                # break
+                break
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
