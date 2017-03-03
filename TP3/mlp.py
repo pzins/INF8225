@@ -5,6 +5,7 @@ __docformat__ = 'restructedtext en'
 import os
 import sys
 import timeit
+import random
 
 import numpy as np
 
@@ -13,6 +14,14 @@ import theano.tensor as T
 
 
 from logreg import LogisticRegression, load_data
+
+
+from keras.datasets import mnist
+from keras.preprocessing.image import ImageDataGenerator, img_to_array
+
+from matplotlib import pyplot
+from keras import backend as K
+K.set_image_dim_ordering('th')
 
 
 # start-snippet-1
@@ -121,9 +130,7 @@ class MLP(object):
         :type n_out: int
         :param n_out: number of output units, the dimension of the space in
         which the labels lie
-
         """
-
         # Since we are dealing with a one hidden layer MLP, this will translate
         # into a HiddenLayer with a relu activation function connected to the
         # LogisticRegression layer; the activation function can be replaced by
@@ -182,6 +189,33 @@ class MLP(object):
         self.input = input
 
 
+  
+def data_augmentation(a):
+    # print(type(setx))
+    # print(setx.shape.eval())
+    # a = setx.get_value()
+    # b = setx.get_value()
+    # print(a[0,:])
+    X_train = a.get_value().reshape(a.get_value().shape[0], 1, 28, 28)
+    X_train = X_train.astype('float32')
+
+    rand_idx = random.randint(0,2)
+    rand_angle_range = random.randint(0,360)
+    shift = random.random();
+    h_flip, v_flip = not random.randint(0,1), not random.randint(0,1)
+    operations = [  ImageDataGenerator(rotation_range=rand_angle_range), 
+                    ImageDataGenerator(width_shift_range=shift, height_shift_range=shift),
+                    ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
+                ]
+    datagen = operations[rand_idx]
+    datagen.fit(X_train)
+    # configure batch size and retrieve one batch of images
+    for X_batch in datagen.flow(X_train, batch_size=a.get_value().shape[0]):
+        # print(X_batch[0].flatten().shape)
+        a.set_value(X_batch.reshape(a.get_value().shape[0],784))
+        break
+            
+
 def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
              dataset='mnist.pkl.gz', batch_size=20, n_hidden=500):
     """
@@ -213,8 +247,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
-
-    print(train_set_x)
+    # print(train_set_x.get_value()[0,:])
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
     n_valid_batches = valid_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -230,7 +263,6 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     x = T.matrix('x')  # the data is presented as rasterized images
     y = T.ivector('y')  # the labels are presented as 1D vector of
                         # [int] labels
-
     rng = np.random.RandomState(1234)
 
     # construct the MLP class
@@ -240,7 +272,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 2
+        nb_layer = 5
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -288,6 +320,9 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         for param, gparam in zip(classifier.params, gparams)
     ]
 
+
+
+
     # compiling a Theano function `train_model` that returns the cost, but
     # in the same time updates the parameter of the model based on the rules
     # defined in `updates`
@@ -329,6 +364,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
+        data_augmentation(train_set_x)
 
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
