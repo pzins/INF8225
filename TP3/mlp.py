@@ -199,19 +199,13 @@ def data_augmentation(a):
     X_train = a.get_value().reshape(a.get_value().shape[0], 1, 28, 28)
     X_train = X_train.astype('float32')
 
-    rand_idx = random.randint(0,2)
-    rand_angle_range = random.randint(0,360)
+    rand_angle_range = random.randint(0,90)
     shift = random.random();
-    h_flip, v_flip = not random.randint(0,1), not random.randint(0,1)
-    operations = [  ImageDataGenerator(rotation_range=rand_angle_range), 
-                    ImageDataGenerator(width_shift_range=shift, height_shift_range=shift),
-                    ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
-                ]
-    datagen = operations[rand_idx]
+    datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift, rotation_range=10, horizontal_flip=False, vertical_flip=False)
+
     datagen.fit(X_train)
     # configure batch size and retrieve one batch of images
     for X_batch in datagen.flow(X_train, batch_size=a.get_value().shape[0]):
-        # print(X_batch[0].flatten().shape)
         a.set_value(X_batch.reshape(a.get_value().shape[0],784))
         break
             
@@ -272,7 +266,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 5
+        nb_layer = 1
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -364,10 +358,14 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
+        # print(train_set_x[0,:].eval())
         data_augmentation(train_set_x)
+        print("DATA AUGMENTATION")
+        # print(train_set_x[0,:].eval())
 
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
+            # print(minibatch_index)
             minibatch_avg_cost = train_model(minibatch_index)
 
             # iteration number
@@ -411,9 +409,9 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
                           (epoch, minibatch_index + 1, n_train_batches,
                            test_score * 100.))
 
-            if patience <= iter:
-                done_looping = True
-                break
+            # if patience <= iter:
+                # done_looping = True
+                # break
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
@@ -424,5 +422,5 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.1, 0.0001, 30, 'mnist.pkl.gz', 10, 30)
+    test_mlp(0.1, 0.0001, 30, 'mnist.pkl.gz', 100, 10)
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
