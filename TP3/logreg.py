@@ -207,7 +207,7 @@ def load_data(dataset):
 
 
 def sgd_optimization_mnist(learning_rate, n_epochs,
-                           dataset='mnist.pkl.gz',
+                           dataset,
                            batch_size):
     """
     Demonstrate stochastic gradient descent optimization of a log-linear
@@ -339,15 +339,16 @@ def sgd_optimization_mnist(learning_rate, n_epochs,
                                      for i in range(n_valid_batches)]
                 this_validation_loss = np.mean(validation_losses)
 
-                print(
-                    'epoch %i, minibatch %i/%i, validation error %f %%' %
-                    (
-                        epoch,
-                        minibatch_index + 1,
-                        n_train_batches,
-                        this_validation_loss * 100.
-                    )
-                )
+
+                # print(
+                #     'epoch %i, minibatch %i/%i, validation error %f %%' %
+                #     (
+                #         epoch,
+                #         minibatch_index + 1,
+                #         n_train_batches,
+                #         this_validation_loss * 100.
+                #     )
+                # )
 
                 # if we got the best validation score until now
                 if this_validation_loss < best_validation_loss:
@@ -362,39 +363,39 @@ def sgd_optimization_mnist(learning_rate, n_epochs,
                                    for i in range(n_test_batches)]
                     test_score = np.mean(test_losses)
 
-                    print(
-                        (
-                            '     epoch %i, minibatch %i/%i, test error of'
-                            ' best model %f %%'
-                        ) %
-                        (
-                            epoch,
-                            minibatch_index + 1,
-                            n_train_batches,
-                            test_score * 100.
-                        )
-                    )
+                    # print(
+                    #     (
+                    #         '     epoch %i, minibatch %i/%i, test error of'
+                    #         ' best model %f %%'
+                    #     ) %
+                    #     (
+                    #         epoch,
+                    #         minibatch_index + 1,
+                    #         n_train_batches,
+                    #         test_score * 100.
+                    #     )
+                    # )
 
                     # save the best model
                     with open('best_model.pkl', 'wb') as f:
                         pickle.dump(classifier, f)
-            if patience <= iter:
-                done_looping = True
-                break
+            # if patience <= iter:
+            #     done_looping = True
+            #     break
 
     end_time = timeit.default_timer()
-    print(
-        (
-            'Optimization complete with best validation score of %f %%,'
-            'with test performance %f %%'
-        )
-        % (best_validation_loss * 100., test_score * 100.)
-    )
-    print('The code run for %d epochs, with %f epochs/sec' % (
-        epoch, 1. * epoch / (end_time - start_time)))
-    print(('The code for file ' +
-           os.path.split(__file__)[1] +
-           ' ran for %.1fs' % ((end_time - start_time))), file=sys.stderr)
+    # print(
+    #     (
+    #         'Optimization complete with best validation score of %f %%,'
+    #         'with test performance %f %%'
+    #     )
+    #     % (best_validation_loss * 100., test_score * 100.)
+    # )
+    # print('The code run for %d epochs, with %f epochs/sec' % (
+    #     epoch, 1. * epoch / (end_time - start_time)))
+    # print(('The code for file ' +
+    #        os.path.split(__file__)[1] +
+    #        ' ran for %.1fs' % ((end_time - start_time))), file=sys.stderr)
     return best_validation_loss * 100, test_score * 100, epoch, (end_time - start_time)
 
 
@@ -426,15 +427,21 @@ def predict():
 if __name__ == '__main__':
     minibatch_size = [10000, 5000, 2500, 1000, 500, 250, 100, 50, 25, 10]
     learning_rates = [0.2, 0.1, 0.05, 0.02, 0.01, 0.001]
+    epochs = [10, 50, 100, 500, 1000]
     res = []
-    for i in learning_rates:
-        best_validation_loss, test_score, epoch, duree = sgd_optimization_mnist(i, 1000, 'mnist.pkl.gz', 50)
+    for i in epochs:
+        best_validation_loss, test_score, epoch, duree = sgd_optimization_mnist(0.05, i, 'mnist.pkl.gz', 50)
         res.append([best_validation_loss, test_score, epoch, duree])
-    
+        
+    # batch size
     # for i in range(len(res)):
     #     print("%d: %f %%, %f %%, %d, %d" % (minibatch_size[i], res[i][0], res[i][1], res[i][2], res[i][3]))
+    # learning rate
+    # for i in range(len(res)):
+    #     print("%f: %f %%, %f %%, %d, %d" % (learning_rates[i], res[i][0], res[i][1], res[i][2], res[i][3]))
+    # nb epoch
     for i in range(len(res)):
-        print("%f: %f %%, %f %%, %d, %d" % (learning_rates[i], res[i][0], res[i][1], res[i][2], res[i][3]))
+        print("%d: %f %%, %f %%, %d, %d" % (epochs[i], res[i][0], res[i][1], res[i][2], res[i][3]))
 
     # params : learning_rate, n_epochs, dataset, batch_size
 
@@ -461,4 +468,12 @@ best 50 :
 0.001000: 8.530000 %, 8.750000 %, 120, 78
 
 best : 0.05
+
+10: 7.750000 %, 7.860000 %, 10, 5
+50: 6.920000 %, 7.570000 %, 50, 27
+100: 6.840000 %, 7.560000 %, 100, 51
+500: 6.840000 %, 7.560000 %, 500, 254
+1000: 6.840000 %, 7.560000 %, 1000, 566
+
+best > 100
 """
