@@ -23,7 +23,6 @@ from matplotlib import pyplot
 from keras import backend as K
 K.set_image_dim_ordering('th')
 
-
 # start-snippet-1
 class HiddenLayer(object):
     def __init__(self, rng, input, n_in, n_out, W=None, b=None,
@@ -190,7 +189,7 @@ class MLP(object):
 
 
   
-def data_augmentation(a):
+def data_augmentation2(a):
     # print(type(setx))
     # print(setx.shape.eval())
     # a = setx.get_value()
@@ -199,16 +198,41 @@ def data_augmentation(a):
     X_train = a.get_value().reshape(a.get_value().shape[0], 1, 28, 28)
     X_train = X_train.astype('float32')
 
-    rand_angle_range = random.randint(0,90)
-    shift = random.random();
-    datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift, rotation_range=10, horizontal_flip=False, vertical_flip=False)
+    shift = 0.01
+    datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift, rotation_range=5, horizontal_flip=False, vertical_flip=False)
 
     datagen.fit(X_train)
     # configure batch size and retrieve one batch of images
     for X_batch in datagen.flow(X_train, batch_size=a.get_value().shape[0]):
         a.set_value(X_batch.reshape(a.get_value().shape[0],784))
         break
-            
+
+def shift_up(mat, nb):
+    for i in range(mat.shape[0]):
+        if i >= mat.shape[0]-nb:
+            mat[i,:].fill(0)
+        else:
+            mat[i,:] = mat[i+nb,:]
+    return mat
+
+def shift_down(mat, nb):
+    for i in reversed(range(mat.shape[0])):
+        if i < nb:
+            mat[i,:].fill(0)
+        else:
+            mat[i,:] = mat[i-nb,:]
+    return mat
+
+def data_augmentation(a):
+    X_train = a.get_value().reshape(a.get_value().shape[0], 28, 28)
+    for i in range(X_train.shape[0]):
+        print(i)
+        X_train[i,:,:] = np.fliplr(X_train[i,:,:])
+        # X_train[i,:,:] = shift_down(X_train[i,:,:],2)
+
+        a.set_value(X_train.reshape(a.get_value().shape[0], 784))
+
+
 
 def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
              dataset='mnist.pkl.gz', batch_size=20, n_hidden=500):
@@ -258,7 +282,6 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     y = T.ivector('y')  # the labels are presented as 1D vector of
                         # [int] labels
     rng = np.random.RandomState(1234)
-
     # construct the MLP class
     classifier = MLP(
         rng=rng,
@@ -358,9 +381,11 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
+
         # print(train_set_x[0,:].eval())
-        data_augmentation(train_set_x)
-        print("DATA AUGMENTATION")
+        # train_set_x, train_set_y = datasets[0]
+        # data_augmentation(train_set_x)
+        # print("DATA AUGMENTATION")
         # print(train_set_x[0,:].eval())
 
         for minibatch_index in range(n_train_batches):
@@ -370,7 +395,10 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
+            print("Iteration : %d" % iter)
 
+
+            # check model on validation set
             if (iter + 1) % validation_frequency == 0:
                 # compute zero-one loss on validation set
                 validation_losses = [validate_model(i) for i

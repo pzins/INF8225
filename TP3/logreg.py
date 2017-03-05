@@ -206,9 +206,9 @@ def load_data(dataset):
     return rval
 
 
-def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
+def sgd_optimization_mnist(learning_rate, n_epochs,
                            dataset='mnist.pkl.gz',
-                           batch_size=600):
+                           batch_size):
     """
     Demonstrate stochastic gradient descent optimization of a log-linear
     model
@@ -378,7 +378,6 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
                     # save the best model
                     with open('best_model.pkl', 'wb') as f:
                         pickle.dump(classifier, f)
-
             if patience <= iter:
                 done_looping = True
                 break
@@ -396,6 +395,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
     print(('The code for file ' +
            os.path.split(__file__)[1] +
            ' ran for %.1fs' % ((end_time - start_time))), file=sys.stderr)
+    return best_validation_loss * 100, test_score * 100, epoch, (end_time - start_time)
 
 
 def predict():
@@ -424,5 +424,41 @@ def predict():
 
 
 if __name__ == '__main__':
-    sgd_optimization_mnist(0.14, 10000, 'mnist.pkl.gz', 60)
-    # params : learning_rate, n_epochs, dataset, batch_size=600
+    minibatch_size = [10000, 5000, 2500, 1000, 500, 250, 100, 50, 25, 10]
+    learning_rates = [0.2, 0.1, 0.05, 0.02, 0.01, 0.001]
+    res = []
+    for i in learning_rates:
+        best_validation_loss, test_score, epoch, duree = sgd_optimization_mnist(i, 1000, 'mnist.pkl.gz', 50)
+        res.append([best_validation_loss, test_score, epoch, duree])
+    
+    # for i in range(len(res)):
+    #     print("%d: %f %%, %f %%, %d, %d" % (minibatch_size[i], res[i][0], res[i][1], res[i][2], res[i][3]))
+    for i in range(len(res)):
+        print("%f: %f %%, %f %%, %d, %d" % (learning_rates[i], res[i][0], res[i][1], res[i][2], res[i][3]))
+
+    # params : learning_rate, n_epochs, dataset, batch_size
+
+"""
+10000: 7.550000 %, 7.820000 %, 1000, 41
+5000: 7.580000 %, 7.810000 %, 501, 20
+2500: 7.430000 %, 7.800000 %, 294, 13
+1000: 7.540000 %, 7.780000 %, 102, 6
+500: 7.160000 %, 7.680000 %, 108, 9
+250: 7.120000 %, 7.700000 %, 58, 10
+100: 6.910000 %, 7.580000 %, 68, 24
+50: 6.930000 %, 7.730000 %, 48, 30
+25: 7.170000 %, 8.100000 %, 20, 14
+10: 7.820000 %, 8.480000 %, 11, 19
+
+best 50 :
+
+
+0.200000: 7.120000 %, 7.880000 %, 26, 16
+0.100000: 7.030000 %, 7.660000 %, 26, 16
+0.050000: 6.840000 %, 7.560000 %, 98, 60
+0.020000: 7.090000 %, 7.680000 %, 96, 60
+0.010000: 7.420000 %, 7.790000 %, 80, 51
+0.001000: 8.530000 %, 8.750000 %, 120, 78
+
+best : 0.05
+"""
