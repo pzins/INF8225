@@ -145,15 +145,18 @@ class MLP(object):
         )
 
         self.hiddenLayers = [self.hiddenLayer]
+        tmp = self.hiddenLayer.output
         for i in range(nb_layer-1):
             self.hiddenLayers.append(
             HiddenLayer(
                 rng=rng,
-                input=self.hiddenLayers[-1].output,
+                # input=self.hiddenLayers[-1].output,
+                input=tmp,
                 n_in=n_hidden,
                 n_out=n_hidden,
                 activation=T.nnet.relu
             ))
+            tmp = self.hiddenLayers[-1].output
 
         # The logistic regression layer gets as input the hidden units
         # of the hidden layer
@@ -248,10 +251,12 @@ def rotate_img(img, angle):
 def data_augmentation(a):
     X_train = a.get_value().reshape(a.get_value().shape[0], 28, 28)
     for i in range(a.get_value().shape[0]):
-        operation = random.randint(0,2)
+        
+        operation = random.randint(1,2)
+        
         flip_dir = random.randint(0,1)
-        angle = random.randint(0,18)
-        shift = random.randint(0,10)
+        angle = random.randint(0,4)
+        shift = random.randint(0,2)
         shift_dir = random.randint(0,3)
         if not operation:
             if not flip_dir:
@@ -260,7 +265,7 @@ def data_augmentation(a):
                 X_train[i,:,:] = np.flipud(X_train[i,:,:])
 
         elif operation == 1:
-            X_train[i,:,:] = rotate_img(X_train[i,:,:], 10)
+            X_train[i,:,:] = rotate_img(X_train[i,:,:], angle)
         else:
             if shift_dir == 0:
                 X_train[i,:,:] = shift_up(X_train[i,:,:], shift)
@@ -310,6 +315,8 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     # print(train_set_x.shape.eval())
     # print(train_set_x.get_value().shape)
     # train_set_x.set_value(np.concatenate((train_set_x.get_value(),train_set_x.get_value()),0))
+    # train_set_x.set_value(np.concatenate((train_set_x.get_value(),train_set_x.get_value()),0))
+    
     data_augmentation(train_set_x)
     data_augmentation(train_set_x)
     
@@ -342,7 +349,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 3
+        nb_layer = 2
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -444,6 +451,10 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         for minibatch_index in range(n_train_batches):
             # learning_rate = epoch
             # print(minibatch_index)
+            
+            # print("-----------------------------------")
+            # print(classifier.params[-2].eval()[0])
+            # print("-----------------------------------")
             minibatch_avg_cost = train_model(minibatch_index)
 
             # iteration number
@@ -500,9 +511,57 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     print(('The code for file ' +
            os.path.split(__file__)[1] +
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
+    return best_validation_loss * 100, test_score * 100, epoch, (end_time - start_time)
+
 
 
 if __name__ == '__main__':
-    test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 100, 30)
+    nb_neurones = [100]
+    res = []
+    for i in nb_neurones:
+        best_validation_loss, test_score, epoch, duree = test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 50,  i)
+        # best_validation_loss, test_score, epoch, duree = test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 200,  i)
+        res.append([best_validation_loss, test_score, epoch, duree])
+    for i in range(len(res)):
+        print("%d: %f %%, %f %%, %d, %d" % (nb_neurones[i], res[i][0], res[i][1], res[i][2], res[i][3]))
     # test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 100, 30) pas mal si 1 hidden layer
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
+
+
+
+"""
+10: 5.930000 %, 6.540000 %, 100, 82
+50: 2.590000 %, 2.360000 %, 100, 101
+100: 2.120000 %, 2.120000 %, 100, 74
+500: 1.740000 %, 1.880000 %, 100, 123
+1000: 1.710000 %, 1.720000 %, 100, 279
+2000: 1.730000 %, 1.780000 %, 100, 566
+
+
+2 hidden
+100: 2.020000 %, 2.340000 %, 100, 91
+
+3 hidden
+100: 2.690000 %, 3.080000 %, 100, 109
+
+4 hiddens
+100: 89.360000 %, 88.650000 %, 100, 127
+
+5 hiddens
+100: 89.360000 %, 88.650000 %, 100, 147
+
+
+
+data aug 2 hidden layer
+100: 4.170000 %, 4.680000 %, 100, 183
+
+200 neurones
+100: 5.250000 %, 5.960000 %, 100, 130
+400: 3.950000 %, 4.130000 %, 100, 318
+
+
+
+**
+100: 2.020000 %, 2.340000 %, 100, 94
+
+"""
