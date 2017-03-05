@@ -21,6 +21,8 @@ from keras.preprocessing.image import ImageDataGenerator, img_to_array
 
 from matplotlib import pyplot
 from keras import backend as K
+
+from scipy.ndimage import rotate
 K.set_image_dim_ordering('th')
 
 # start-snippet-1
@@ -188,6 +190,7 @@ class MLP(object):
         self.input = input
 
 
+
   
 def data_augmentation2(a):
     # print(type(setx))
@@ -207,12 +210,20 @@ def data_augmentation2(a):
         a.set_value(X_batch.reshape(a.get_value().shape[0],784))
         break
 
+
 def shift_up(mat, nb):
     for i in range(mat.shape[0]):
         if i >= mat.shape[0]-nb:
             mat[i,:].fill(0)
         else:
             mat[i,:] = mat[i+nb,:]
+    return mat
+def shift_right(mat, nb):
+    for i in range(mat.shape[1]):
+        if i >= mat.shape[1]-nb:
+            mat[:,i].fill(0)
+        else:
+            mat[:,i] = mat[:,i+nb]
     return mat
 
 def shift_down(mat, nb):
@@ -223,14 +234,44 @@ def shift_down(mat, nb):
             mat[i,:] = mat[i-nb,:]
     return mat
 
+def shift_left(mat, nb):
+    for i in reversed(range(mat.shape[1])):
+        if i < nb:
+            mat[:,i].fill(0)
+        else:
+            mat[:,i] = mat[:,i-nb]
+    return mat
+
+def rotate_img(img, angle):
+    return rotate(img, angle, reshape=False)
+
 def data_augmentation(a):
     X_train = a.get_value().reshape(a.get_value().shape[0], 28, 28)
-    for i in range(X_train.shape[0]):
-        print(i)
-        X_train[i,:,:] = np.fliplr(X_train[i,:,:])
-        # X_train[i,:,:] = shift_down(X_train[i,:,:],2)
+    for i in range(a.get_value().shape[0]):
+        operation = random.randint(0,2)
+        flip_dir = random.randint(0,1)
+        angle = random.randint(0,18)
+        shift = random.randint(0,10)
+        shift_dir = random.randint(0,3)
+        if not operation:
+            if not flip_dir:
+                X_train[i,:,:] = np.fliplr(X_train[i,:,:])
+            else:
+                X_train[i,:,:] = np.flipud(X_train[i,:,:])
 
-        a.set_value(X_train.reshape(a.get_value().shape[0], 784))
+        elif operation == 1:
+            X_train[i,:,:] = rotate_img(X_train[i,:,:], 10)
+        else:
+            if shift_dir == 0:
+                X_train[i,:,:] = shift_up(X_train[i,:,:], shift)
+            elif shift_dir == 1:
+                X_train[i,:,:] = shift_down(X_train[i,:,:], shift)
+            elif shift_dir == 2:
+                X_train[i,:,:] = shift_left(X_train[i,:,:], shift)
+            else:
+                X_train[i,:,:] = shift_right(X_train[i,:,:], shift)
+
+    a.set_value(np.concatenate((a.get_value(),X_train.reshape(a.get_value().shape[0], 784)),0))
 
 
 
@@ -265,7 +306,19 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     train_set_x, train_set_y = datasets[0]
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
-    # print(train_set_x.get_value()[0,:])
+
+    # print(train_set_x.shape.eval())
+    # print(train_set_x.get_value().shape)
+    # train_set_x.set_value(np.concatenate((train_set_x.get_value(),train_set_x.get_value()),0))
+    data_augmentation(train_set_x)
+    data_augmentation(train_set_x)
+    
+    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
+    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
+    # train_set_y.set_value(np.concatenate((train_set_y.get_value(),train_set_y.get_value()),0))
+    # print(train_set_x.shape.eval())
+    # print(train_set_x.get_value().shape)
+
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
     n_valid_batches = valid_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -289,7 +342,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 1
+        nb_layer = 3
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -395,7 +448,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
-            print("Iteration : %d" % iter)
+            # print("Iteration : %d" % iter)
 
 
             # check model on validation set
@@ -450,5 +503,6 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
 
 
 if __name__ == '__main__':
-    test_mlp(0.1, 0.0001, 30, 'mnist.pkl.gz', 100, 10)
+    test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 100, 30)
+    # test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 100, 30) pas mal si 1 hidden layer
     # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
