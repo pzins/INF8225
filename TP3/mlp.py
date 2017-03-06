@@ -257,7 +257,7 @@ def data_augmentation(a):
 
 
 def test_mlp(learning_rate, L2_reg, n_epochs,
-             dataset, batch_size, n_hidden):
+             dataset, batch_size, n_hidden, nb_layers):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
@@ -318,7 +318,7 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
         n_in=28 * 28,
         n_hidden=n_hidden,
         n_out=10,
-        nb_layer = 2
+        nb_layer = nb_layers
     )
     # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
@@ -500,83 +500,14 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
 
 if __name__ == '__main__':
-    nb_neurones = [500]
-    res = []
-    for i in nb_neurones:
-        validation_score, test_score, training_score, epoch, duree = test_mlp(0.1, 0.0001, 100, 'mnist.pkl.gz', 50,  i)
-        res.append([validation_score, test_score, training_score, epoch, duree])
-    for i in range(len(res)):
-        print("\n\nnb neurons - validation score - training score - test score - epoch - duree")
-        print("%d:     %f %%,     %f %%,     %f %%,     %d,     %d" % (nb_neurones[i], res[i][0], res[i][1], res[i][2], res[i][3], res[i][4]))
+    learning_rate = 0.1
+    penalisation = 0.0001
+    epochs = 50
+    minibatch_size = 50
+    nb_neurones = 250
+    nb_layer = 2
 
+    validation_score, test_score, training_score, epoch, duree = test_mlp(learning_rate, penalisation, epochs, 'mnist.pkl.gz', minibatch_size, nb_neurones, nb_layer)
+    print("\n\nvalidation score - test score - training score - epoch - duree")
+    print("%f %%,     %f %%,     %f %%,     %d,     %d" % (validation_score, test_score, training_score, epoch, duree))
 
-
-"""
-10: 5.930000 %, 6.540000 %, 100, 82
-50: 2.590000 %, 2.360000 %, 100, 101
-100: 2.120000 %, 2.120000 %, 100, 74
-500: 1.740000 %, 1.880000 %, 100, 123
-1000: 1.710000 %, 1.720000 %, 100, 279
-2000: 1.730000 %, 1.780000 %, 100, 566
-
-
-2 hidden
-100: 2.020000 %, 2.340000 %, 100, 91
-
-3 hidden
-100: 2.690000 %, 3.080000 %, 100, 109
-
-4 hiddens
-100: 89.360000 %, 88.650000 %, 100, 127
-
-5 hiddens
-100: 89.360000 %, 88.650000 %, 100, 147
-
-
-
-data aug 2 hidden layer
-100: 4.170000 %, 4.680000 %, 100, 183
-
-200 neurones
-100: 5.250000 %, 5.960000 %, 100, 130
-400: 3.950000 %, 4.130000 %, 100, 318
-
-
-
-**
-100: 2.020000 %, 2.340000 %, 100, 94
-
-avc data augm tt reste pareil
-100: 1.680000 %, 1.760000 %, 100, 356
-
-check flip si grave
----------- 
-avec data aug
-Optimization complete. Best validation score of 1.370000 % obtained at iteration 136000, with test performance 1.550000 %
-The code for file mlp.py ran for 14.03m
-nb neurons - validation score - training score - test score - epoch - duree
-500:     1.370000 %,     1.550000 %,     0.152500 %,     68,     841
-
-sans data aug
-Optimization complete. Best validation score of 1.740000 % obtained at iteration 47000, with test performance 1.960000 %
-The code for file mlp.py ran for 2.77m
-
-
-nb neurons - validation score - training score - test score - epoch - duree
-500:     1.740000 %,     1.960000 %,     0.018000 %,     100,     166
-
-
-
-new
-sans
-Optimization complete. Best validation score of 1.720000 % obtained at iteration 94000, with test performance 1.870000 %
-The code for file mlp.py ran for 5.05m
-
-
-nb neurons - validation score - training score - test score - epoch - duree
-500:     1.720000 %,     1.870000 %,     0.032000 %,     100,     302
-
-
-avec
-
-"""
