@@ -15,15 +15,8 @@ import theano.tensor as T
 
 from logreg import LogisticRegression, load_data
 
-
-from keras.datasets import mnist
-from keras.preprocessing.image import ImageDataGenerator, img_to_array
-
-from matplotlib import pyplot
-from keras import backend as K
-
 from scipy.ndimage import rotate
-K.set_image_dim_ordering('th')
+import matplotlib.pyplot  as plt
 
 # start-snippet-1
 class HiddenLayer(object):
@@ -143,20 +136,17 @@ class MLP(object):
             n_out=n_hidden,
             activation=T.nnet.relu
         )
-
+        # add more hidden layers
         self.hiddenLayers = [self.hiddenLayer]
-        tmp = self.hiddenLayer.output
         for i in range(nb_layer-1):
             self.hiddenLayers.append(
             HiddenLayer(
                 rng=rng,
-                # input=self.hiddenLayers[-1].output,
-                input=tmp,
+                input=self.hiddenLayers[-1].output,
                 n_in=n_hidden,
                 n_out=n_hidden,
                 activation=T.nnet.relu
             ))
-            tmp = self.hiddenLayers[-1].output
 
         # The logistic regression layer gets as input the hidden units
         # of the hidden layer
@@ -193,27 +183,7 @@ class MLP(object):
         self.input = input
 
 
-
-  
-def data_augmentation2(a):
-    # print(type(setx))
-    # print(setx.shape.eval())
-    # a = setx.get_value()
-    # b = setx.get_value()
-    # print(a[0,:])
-    X_train = a.get_value().reshape(a.get_value().shape[0], 1, 28, 28)
-    X_train = X_train.astype('float32')
-
-    shift = 0.01
-    datagen = ImageDataGenerator(width_shift_range=shift, height_shift_range=shift, rotation_range=5, horizontal_flip=False, vertical_flip=False)
-
-    datagen.fit(X_train)
-    # configure batch size and retrieve one batch of images
-    for X_batch in datagen.flow(X_train, batch_size=a.get_value().shape[0]):
-        a.set_value(X_batch.reshape(a.get_value().shape[0],784))
-        break
-
-
+#DATA AUGMENTATION
 def shift_up(mat, nb):
     for i in range(mat.shape[0]):
         if i >= mat.shape[0]-nb:
@@ -221,6 +191,7 @@ def shift_up(mat, nb):
         else:
             mat[i,:] = mat[i+nb,:]
     return mat
+
 def shift_right(mat, nb):
     for i in range(mat.shape[1]):
         if i >= mat.shape[1]-nb:
@@ -249,15 +220,20 @@ def rotate_img(img, angle):
     return rotate(img, angle, reshape=False)
 
 def data_augmentation(a):
+    #get np.ndarray of the input data x
     X_train = a.get_value().reshape(a.get_value().shape[0], 28, 28)
+    #iterate over it
     for i in range(a.get_value().shape[0]):
-        
+        # random operation
         operation = random.randint(1,2)
         
+        # random operation parameter
         flip_dir = random.randint(0,1)
         angle = random.randint(0,4)
         shift = random.randint(0,2)
         shift_dir = random.randint(0,3)
+        
+        #apply transformation
         if not operation:
             if not flip_dir:
                 X_train[i,:,:] = np.fliplr(X_train[i,:,:])
@@ -275,13 +251,13 @@ def data_augmentation(a):
                 X_train[i,:,:] = shift_left(X_train[i,:,:], shift)
             else:
                 X_train[i,:,:] = shift_right(X_train[i,:,:], shift)
-
+    #add new input data to the input data
     a.set_value(np.concatenate((a.get_value(),X_train.reshape(a.get_value().shape[0], 784)),0))
 
 
 
-def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
-             dataset='mnist.pkl.gz', batch_size=20, n_hidden=500):
+def test_mlp(learning_rate, L2_reg, n_epochs,
+             dataset, batch_size, n_hidden):
     """
     Demonstrate stochastic gradient descent optimization for a multilayer
     perceptron
@@ -312,20 +288,12 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
 
-    # print(train_set_x.shape.eval())
-    # print(train_set_x.get_value().shape)
-    # train_set_x.set_value(np.concatenate((train_set_x.get_value(),train_set_x.get_value()),0))
-    # train_set_x.set_value(np.concatenate((train_set_x.get_value(),train_set_x.get_value()),0))
-    
+    # # two time data augmentation x and y
     data_augmentation(train_set_x)
     data_augmentation(train_set_x)
+    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
+    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
     
-    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
-    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
-    # train_set_y.set_value(np.concatenate((train_set_y.get_value(),train_set_y.get_value()),0))
-    # print(train_set_x.shape.eval())
-    # print(train_set_x.get_value().shape)
-
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
     n_valid_batches = valid_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -341,6 +309,7 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     x = T.matrix('x')  # the data is presented as rasterized images
     y = T.ivector('y')  # the labels are presented as 1D vector of
                         # [int] labels
+    
     rng = np.random.RandomState(1234)
     # construct the MLP class
     classifier = MLP(
@@ -380,6 +349,14 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
             y: valid_set_y[index * batch_size:(index + 1) * batch_size]
         }
     )
+    training_model = theano.function(
+        inputs=[index],
+        outputs=classifier.errors(y),
+        givens={
+            x: train_set_x[index * batch_size:(index + 1) * batch_size],
+            y: train_set_y[index * batch_size:(index + 1) * batch_size]
+        }
+    )
 
     # start-snippet-5
     # compute the gradient of cost with respect to theta (sorted in params)
@@ -414,6 +391,9 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     )
     # end-snippet-5
 
+    validation_scores = []
+    training_scores = []
+
     ###############
     # TRAIN MODEL #
     ###############
@@ -442,25 +422,13 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     while (epoch < n_epochs) and (not done_looping):
         epoch = epoch + 1
 
-        # print(train_set_x[0,:].eval())
-        # train_set_x, train_set_y = datasets[0]
-        # data_augmentation(train_set_x)
-        # print("DATA AUGMENTATION")
-        # print(train_set_x[0,:].eval())
-
         for minibatch_index in range(n_train_batches):
-            # learning_rate = epoch
-            # print(minibatch_index)
             
-            # print("-----------------------------------")
-            # print(classifier.params[-2].eval()[0])
-            # print("-----------------------------------")
             minibatch_avg_cost = train_model(minibatch_index)
+
 
             # iteration number
             iter = (epoch - 1) * n_train_batches + minibatch_index
-            # print("Iteration : %d" % iter)
-
 
             # check model on validation set
             if (iter + 1) % validation_frequency == 0:
@@ -468,7 +436,13 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
                 validation_losses = [validate_model(i) for i
                                      in range(n_valid_batches)]
                 this_validation_loss = np.mean(validation_losses)
+                
+                #get score on the training set
+                training_losses = [training_model(i) for i in range(n_train_batches)]
+                training_score = np.mean(training_losses)
 
+                validation_scores.append(this_validation_loss*100)
+                training_scores.append(training_score*100)
                 print(
                     'epoch %i, minibatch %i/%i, validation error %f %%' %
                     (
@@ -501,9 +475,10 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
                           (epoch, minibatch_index + 1, n_train_batches,
                            test_score * 100.))
 
-            # if patience <= iter:
-                # done_looping = True
-                # break
+            if patience <= iter:
+                done_looping = True
+                break
+
     end_time = timeit.default_timer()
     print(('Optimization complete. Best validation score of %f %% '
            'obtained at iteration %i, with test performance %f %%') %
@@ -511,21 +486,28 @@ def test_mlp(learning_rate=0.01, L2_reg=0.0001, n_epochs=1000,
     print(('The code for file ' +
            os.path.split(__file__)[1] +
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
-    return best_validation_loss * 100, test_score * 100, epoch, (end_time - start_time)
+
+    plt.plot(np.arange(len(validation_scores)), validation_scores, 'r--', np.arange(len(training_scores)), training_scores, 'b--')
+    plt.xlabel('epoch')
+    plt.ylabel('error')
+    plt.title('validation and training error')
+    plt.legend(['validation set', 'training set'],loc=1)
+    plt.show()
+
+
+    return best_validation_loss * 100, test_score * 100, training_score * 100,  epoch, (end_time - start_time)
 
 
 
 if __name__ == '__main__':
-    nb_neurones = [100]
+    nb_neurones = [500]
     res = []
     for i in nb_neurones:
-        best_validation_loss, test_score, epoch, duree = test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 50,  i)
-        # best_validation_loss, test_score, epoch, duree = test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 200,  i)
-        res.append([best_validation_loss, test_score, epoch, duree])
+        validation_score, test_score, training_score, epoch, duree = test_mlp(0.1, 0.0001, 100, 'mnist.pkl.gz', 50,  i)
+        res.append([validation_score, test_score, training_score, epoch, duree])
     for i in range(len(res)):
-        print("%d: %f %%, %f %%, %d, %d" % (nb_neurones[i], res[i][0], res[i][1], res[i][2], res[i][3]))
-    # test_mlp(0.05, 0.0001, 100, 'mnist.pkl.gz', 100, 30) pas mal si 1 hidden layer
-    # params : learning_rate, L2_reg, n_epochs, dataset, batch_size, n_hidden
+        print("\n\nnb neurons - validation score - training score - test score - epoch - duree")
+        print("%d:     %f %%,     %f %%,     %f %%,     %d,     %d" % (nb_neurones[i], res[i][0], res[i][1], res[i][2], res[i][3], res[i][4]))
 
 
 
@@ -563,5 +545,38 @@ data aug 2 hidden layer
 
 **
 100: 2.020000 %, 2.340000 %, 100, 94
+
+avc data augm tt reste pareil
+100: 1.680000 %, 1.760000 %, 100, 356
+
+check flip si grave
+---------- 
+avec data aug
+Optimization complete. Best validation score of 1.370000 % obtained at iteration 136000, with test performance 1.550000 %
+The code for file mlp.py ran for 14.03m
+nb neurons - validation score - training score - test score - epoch - duree
+500:     1.370000 %,     1.550000 %,     0.152500 %,     68,     841
+
+sans data aug
+Optimization complete. Best validation score of 1.740000 % obtained at iteration 47000, with test performance 1.960000 %
+The code for file mlp.py ran for 2.77m
+
+
+nb neurons - validation score - training score - test score - epoch - duree
+500:     1.740000 %,     1.960000 %,     0.018000 %,     100,     166
+
+
+
+new
+sans
+Optimization complete. Best validation score of 1.720000 % obtained at iteration 94000, with test performance 1.870000 %
+The code for file mlp.py ran for 5.05m
+
+
+nb neurons - validation score - training score - test score - epoch - duree
+500:     1.720000 %,     1.870000 %,     0.032000 %,     100,     302
+
+
+avec
 
 """

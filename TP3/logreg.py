@@ -393,7 +393,7 @@ def sgd_optimization_mnist(learning_rate, n_epochs,
                 done_looping = True
                 break
 
-    #print final score on the training set
+    # get final score on the training set
     training_losses = [training_model(i) for i in range(n_train_batches)]
     training_score = np.mean(training_losses)
     end_time = timeit.default_timer()
