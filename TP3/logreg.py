@@ -445,20 +445,20 @@ if __name__ == '__main__':
 
     # changing batch size
     # for i in minibatch_size:
-    #     validation_score, test_score, training_score, epoch, duree = sgd_optimization_mnist(0.1, 120, 'mnist.pkl.gz', i)
-    #     res.append([validation_score, test_score, training_score, epoch, duree])
+        # validation_score, test_score, training_score, epoch, duree = sgd_optimization_mnist(0.1, 10000, 'mnist.pkl.gz', i)
+        # res.append([validation_score, test_score, training_score, epoch, duree])
     # print("\n\nminibatch size - validation score - training score - test score - epoch - duree")
     # for i in range(len(res)):
         # print("%d :     %f %%,     %f %%,     %f %%,     %d,     %d" % (minibatch_size[i], res[i][0], res[i][1], res[i][2], res[i][3], res[i][4]))
         
     # changing learning rate
     # for i in learning_rates:
-    #     validation_score, test_score, training_score, epoch, duree = sgd_optimization_mnist(i, 120, 'mnist.pkl.gz', 100)
+    #     validation_score, test_score, training_score, epoch, duree = sgd_optimization_mnist(i, 1000, 'mnist.pkl.gz', 100)
     #     res.append([validation_score, test_score, training_score, epoch, duree])
     
     # print("\n\nlearning rate - validation score - training score - test score - epoch - duree")
     # for i in range(len(res)):
-    #     print("%d :     %f %%,     %f %%,     %f %%,     %d,     %d" % (learning_rates[i], res[i][0], res[i][1], res[i][2], res[i][3], res[i][4]))
+    #     print("%f :     %f %%,     %f %%,     %f %%,     %d,     %d" % (learning_rates[i], res[i][0], res[i][1], res[i][2], res[i][3], res[i][4]))
     # quit()
     
     # best hyperparameters
