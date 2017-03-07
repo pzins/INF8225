@@ -295,7 +295,7 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
     # data augmentation 
     # second parametre N : size train_set_x = N * size train_set_x_initial
-    # train_set_y = data_augmentation(train_set_x, train_set_y, 3)
+    train_set_y = data_augmentation(train_set_x, train_set_y, 3)
     
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -501,10 +501,10 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
 if __name__ == '__main__':
     learning_rate = 0.1
-    penalisation = 0.001
+    penalisation = 0.0001
     epochs = 100
     minibatch_size = 100
-    nb_neurones = 100
+    nb_neurones = 1000
     nb_layer = 2
 
     validation_score, test_score, training_score, epoch, duree = test_mlp(learning_rate, penalisation, epochs, 'mnist.pkl.gz', minibatch_size, nb_neurones, nb_layer)
