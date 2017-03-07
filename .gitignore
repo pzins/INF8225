@@ -2,3 +2,4 @@
 *.pkl
 *.pkl.gz
 *.gz
+__pycache__
