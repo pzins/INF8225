@@ -18,10 +18,9 @@ from logreg import LogisticRegression, load_data
 from scipy.ndimage import rotate
 import matplotlib.pyplot  as plt
 
-# start-snippet-1
 class HiddenLayer(object):
     def __init__(self, rng, input, n_in, n_out, W=None, b=None,
-                 activation=T.tanh):
+                 activation=T.nnet.relu):
         """
         Typical hidden layer of a MLP: units are fully-connected and have
         sigmoidal activation function. Weight matrix W is of shape (n_in,n_out)
@@ -48,7 +47,6 @@ class HiddenLayer(object):
                            layer
         """
         self.input = input
-        # end-snippet-1
 
         # `W` is initialized with `W_values` which is uniformely sampled
         # from -2/n_in and 2/n_in
@@ -92,7 +90,6 @@ class HiddenLayer(object):
         self.params = [self.W, self.b]
 
 
-# start-snippet-2
 class MLP(object):
     """Multi-Layer Perceptron Class
 
@@ -219,40 +216,51 @@ def shift_left(mat, nb):
 def rotate_img(img, angle):
     return rotate(img, angle, reshape=False)
 
-def data_augmentation(a):
-    #get np.ndarray of the input data x
-    X_train = a.get_value().reshape(a.get_value().shape[0], 28, 28)
-    #iterate over it
-    for i in range(a.get_value().shape[0]):
-        # random operation
-        operation = random.randint(1,2)
-        
-        # random operation parameter
-        flip_dir = random.randint(0,1)
-        angle = random.randint(0,4)
-        shift = random.randint(0,2)
-        shift_dir = random.randint(0,3)
-        
-        #apply transformation
-        if not operation:
-            if not flip_dir:
-                X_train[i,:,:] = np.fliplr(X_train[i,:,:])
-            else:
-                X_train[i,:,:] = np.flipud(X_train[i,:,:])
+def data_augmentation(train_set_x, train_set_y, coeff=1):
+    init_size = train_set_x.get_value().shape[0]
+    res = [train_set_x.get_value()] * coeff
+    for k in range(coeff):
+        #get np.ndarray of the input data x
+        X_train = train_set_x.get_value().reshape(train_set_x.get_value().shape[0], 28, 28)
+        #iterate over it
+        for i in range(train_set_x.get_value().shape[0]):
+            # random operation
+            operation = random.randint(1,2)
+            
+            # random operation parameter
+            flip_dir = random.randint(0,1)
+            angle = random.randint(0,4)
+            shift = random.randint(0,2)
+            shift_dir = random.randint(0,3)
+            
+            #apply transformation
+            if not operation:
+                if not flip_dir:
+                    X_train[i,:,:] = np.fliplr(X_train[i,:,:])
+                else:
+                    X_train[i,:,:] = np.flipud(X_train[i,:,:])
 
-        elif operation == 1:
-            X_train[i,:,:] = rotate_img(X_train[i,:,:], angle)
-        else:
-            if shift_dir == 0:
-                X_train[i,:,:] = shift_up(X_train[i,:,:], shift)
-            elif shift_dir == 1:
-                X_train[i,:,:] = shift_down(X_train[i,:,:], shift)
-            elif shift_dir == 2:
-                X_train[i,:,:] = shift_left(X_train[i,:,:], shift)
+            elif operation == 1:
+                X_train[i,:,:] = rotate_img(X_train[i,:,:], angle)
             else:
-                X_train[i,:,:] = shift_right(X_train[i,:,:], shift)
-    #add new input data to the input data
-    a.set_value(np.concatenate((a.get_value(),X_train.reshape(a.get_value().shape[0], 784)),0))
+                if shift_dir == 0:
+                    X_train[i,:,:] = shift_up(X_train[i,:,:], shift)
+                elif shift_dir == 1:
+                    X_train[i,:,:] = shift_down(X_train[i,:,:], shift)
+                elif shift_dir == 2:
+                    X_train[i,:,:] = shift_left(X_train[i,:,:], shift)
+                else:
+                    X_train[i,:,:] = shift_right(X_train[i,:,:], shift)
+        # save result
+        res[k] = X_train
+    
+    saved_train_set_y = train_set_y # save initial train_set_y
+    for k in range(coeff):
+        # concatenate all the results
+        train_set_x.set_value(np.concatenate((train_set_x.get_value(),res[k].reshape(init_size, 784)),0))
+        train_set_y = T.concatenate((train_set_y, saved_train_set_y), 0)
+    return train_set_y
+
 
 
 
@@ -288,11 +296,9 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
     valid_set_x, valid_set_y = datasets[1]
     test_set_x, test_set_y = datasets[2]
 
-    # # two time data augmentation x and y
-    data_augmentation(train_set_x)
-    data_augmentation(train_set_x)
-    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
-    train_set_y = T.concatenate((train_set_y, train_set_y), 0)
+    # data augmentation 
+    # second parametre N : size train_set_x = N * size train_set_x_initial
+    # train_set_y = data_augmentation(train_set_x, train_set_y, 3)
     
     # compute number of minibatches for training, validation and testing
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] // batch_size
@@ -320,7 +326,6 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
         n_out=10,
         nb_layer = nb_layers
     )
-    # start-snippet-4
     # the cost we minimize during training is the negative log likelihood of
     # the model plus the regularization terms (L2); cost is expressed
     # here symbolically
@@ -328,7 +333,6 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
         classifier.negative_log_likelihood(y)
        + L2_reg * classifier.L2_sqr
     )
-    # end-snippet-4
 
     # compiling a Theano function that computes the mistakes that are made
     # by the model on a minibatch
@@ -358,7 +362,6 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
         }
     )
 
-    # start-snippet-5
     # compute the gradient of cost with respect to theta (sorted in params)
     # the resulting gradients will be stored in a list gparams
     gparams = [T.grad(cost, param) for param in classifier.params]
@@ -389,7 +392,6 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
             y: train_set_y[index * batch_size: (index + 1) * batch_size]
         }
     )
-    # end-snippet-5
 
     validation_scores = []
     training_scores = []
@@ -501,10 +503,10 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
 if __name__ == '__main__':
     learning_rate = 0.1
-    penalisation = 0.0001
-    epochs = 50
-    minibatch_size = 50
-    nb_neurones = 250
+    penalisation = 0.001
+    epochs = 100
+    minibatch_size = 100
+    nb_neurones = 100
     nb_layer = 2
 
     validation_score, test_score, training_score, epoch, duree = test_mlp(learning_rate, penalisation, epochs, 'mnist.pkl.gz', minibatch_size, nb_neurones, nb_layer)

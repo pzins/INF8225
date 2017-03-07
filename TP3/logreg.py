@@ -34,7 +34,6 @@ class LogisticRegression(object):
                       which the labels lie
 
         """
-        # start-snippet-1
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
         self.W = theano.shared(
             value=np.zeros(
@@ -85,7 +84,6 @@ class LogisticRegression(object):
         Note: we use the mean instead of the sum so that
               the learning rate is less dependent on the batch size
         """
-        # start-snippet-2
         # y.shape[0] is (symbolically) the number of rows in y, i.e.,
         # number of examples (call it n) in the minibatch
         # T.arange(y.shape[0]) is a symbolic vector which will contain
@@ -293,7 +291,6 @@ def sgd_optimization_mnist(learning_rate, n_epochs,
     g_W = T.grad(cost=cost, wrt=classifier.W)
     g_b = T.grad(cost=cost, wrt=classifier.b)
 
-    # start-snippet-3
     # specify how to update the parameters of the model as a list of
     # (variable, update expression) pairs.
     updates = [(classifier.W, classifier.W - learning_rate * g_W),
@@ -311,7 +308,6 @@ def sgd_optimization_mnist(learning_rate, n_epochs,
             y: train_set_y[index * batch_size: (index + 1) * batch_size]
         }
     )
-    # end-snippet-3
 
     ###############
     # TRAIN MODEL #
