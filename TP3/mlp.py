@@ -69,9 +69,6 @@ class HiddenLayer(object):
                 ),
                 dtype=theano.config.floatX
             )
-            if activation == theano.tensor.nnet.sigmoid:
-                W_values *= 4
-
             W = theano.shared(value=W_values, name='W', borrow=True)
 
         if b is None:
@@ -445,6 +442,7 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
                 validation_scores.append(this_validation_loss*100)
                 training_scores.append(training_score*100)
+                
                 print(
                     'epoch %i, minibatch %i/%i, validation error %f %%' %
                     (
