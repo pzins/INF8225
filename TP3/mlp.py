@@ -507,8 +507,8 @@ if __name__ == '__main__':
     learning_rate = 0.1
     minibatch_size = 100
     
-    penalisation = 0.001
-    nb_neurones = 25
+    penalisation = 0.0001
+    nb_neurones = 1000
     nb_layer = 2
 
     validation_score, test_score, training_score, epoch, duree = test_mlp(learning_rate, penalisation, epochs, 'mnist.pkl.gz', minibatch_size, nb_neurones, nb_layer)
