@@ -18,6 +18,8 @@ from logreg import LogisticRegression, load_data
 from scipy.ndimage import rotate
 import matplotlib.pyplot  as plt
 
+
+
 class HiddenLayer(object):
     def __init__(self, rng, input, n_in, n_out, W=None, b=None,
                  activation=T.nnet.relu):
@@ -350,6 +352,7 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
             y: valid_set_y[index * batch_size:(index + 1) * batch_size]
         }
     )
+    # to compute errors on the training set
     training_model = theano.function(
         inputs=[index],
         outputs=classifier.errors(y),
@@ -500,11 +503,12 @@ def test_mlp(learning_rate, L2_reg, n_epochs,
 
 
 if __name__ == '__main__':
-    learning_rate = 0.1
-    penalisation = 0.0001
     epochs = 100
+    learning_rate = 0.1
     minibatch_size = 100
-    nb_neurones = 1000
+    
+    penalisation = 0.001
+    nb_neurones = 25
     nb_layer = 2
 
     validation_score, test_score, training_score, epoch, duree = test_mlp(learning_rate, penalisation, epochs, 'mnist.pkl.gz', minibatch_size, nb_neurones, nb_layer)
