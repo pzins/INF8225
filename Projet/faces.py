@@ -57,7 +57,7 @@ def getAgeCategory(age):
 data = sio.loadmat("wiki.mat")
 # print(data.shape)
 d = data["wiki"]
-taille_img_out = 32
+taille_img_out = 128
 nb_categories = 2
 
 a = np.array(d[0][0][2][:][0])
@@ -73,7 +73,7 @@ for it in range(int(dataset_size/batchSize)):
 	x_train = np.array([np.array(cv2.imread("/home/pierre/Downloads/wiki_crop/"+fname[0], 1)) for fname in a[it*batchSize:(it+1)*batchSize]])
 
 	b = np.array(d[0][0][3][:][0][it*batchSize:(it+1)*batchSize])
-	"""
+	
 	dob = np.array(d[0][0][0][:][0][it*batchSize:(it+1)*batchSize])
 	photo_date = np.array(d[0][0][1][:][0][it*batchSize:(it+1)*batchSize])
 
@@ -81,7 +81,7 @@ for it in range(int(dataset_size/batchSize)):
 		# dob[i] = getAgeCategory(getAge(dob[i], photo_date[i]))
 		dob[i] = getAge(dob[i], photo_date[i])
 	b = dob
-	"""
+	
 
 	# c = np.array(d[0][0][5][:][0][:taille])
 	# e = np.array(d[0][0][2][:][0][:taille])
@@ -153,11 +153,11 @@ for it in range(int(dataset_size/batchSize)):
 
 	x_train = np.asarray(real_set)
 	y_train = np.array(label)
-	y_train = keras.utils.to_categorical(y_train, nb_categories)
+	# y_train = keras.utils.to_categorical(y_train, nb_categories)
 	# x_train = np.expand_dims(x_train, 4)
 
-	x_train.dump("data1000/32_large/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
-	y_train.dump("data1000/32_large/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	x_train.dump("data1000/128_age/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	y_train.dump("data1000/128_age/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
 #data7 => test
 #data6 => size 128 + colored
 #data4 => size 250	
