@@ -80,8 +80,8 @@ for it in range(int(dataset_size/batchSize)):
 	for i in range(len(dob)):
 		# dob[i] = getAgeCategory(getAge(dob[i], photo_date[i]))
 		dob[i] = getAge(dob[i], photo_date[i])
-	b = dob
-	
+	b = np.column_stack((b,dob))
+
 
 	# c = np.array(d[0][0][5][:][0][:taille])
 	# e = np.array(d[0][0][2][:][0][:taille])
@@ -142,7 +142,8 @@ for it in range(int(dataset_size/batchSize)):
 				# scipy.misc.imsave(name, im)
 			break
 		if test == 1:
-			if np.isnan(b[counter]) or b[counter] == -1:
+			# if np.isnan(b[counter]) or b[counter] == -1:
+			if np.isnan(b[counter][0]) or b[counter][1] == -1:
 				real_set.pop()
 			else:
 				label.append(b[counter])
@@ -156,8 +157,8 @@ for it in range(int(dataset_size/batchSize)):
 	# y_train = keras.utils.to_categorical(y_train, nb_categories)
 	# x_train = np.expand_dims(x_train, 4)
 
-	x_train.dump("data1000/128_age/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
-	y_train.dump("data1000/128_age/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	x_train.dump("data1000/128_age_gender/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	y_train.dump("data1000/128_age_gender/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
 #data7 => test
 #data6 => size 128 + colored
 #data4 => size 250	

@@ -78,7 +78,8 @@ for i in range(3, len(ages)):
 
 
 
-num_classes = int(100/interval_length)+2
+# num_classes = int(100/interval_length)+2
+num_classes = 7
 
 def getAgeCategory(age):
   """
@@ -86,26 +87,28 @@ def getAgeCategory(age):
     return 0
   return 1
   """
-  return classes1[int(age)]
-  """
-  return age
+  # return classes1[int(age)]
+  
+  # return age
   if age < 20:
     return 0
-  elif age >= 20 and age < 30:
+  elif age >= 20 and age < 25:
     return 1
-  elif age >= 30 and age < 40:
+  elif age >= 25 and age < 30:
     return 2
-  elif age >= 40 and age < 50:
+  elif age >= 30 and age < 35:
     return 3
-  elif age >= 50 and age < 60:
+  elif age >= 35 and age < 45:
     return 4
-  else:
+  elif age >= 45 and age < 60:
     return 5
-  """
+  else:
+    return 6
+
 
 x_set = np.array([]).reshape(0, 128, 128, 3)
 y_set = np.array([]).reshape(0)
-for it in range(6):
+for it in range(1):
     x_tmp = np.load("data1000/128_age/xtrain_128_" + str(it) + ".dat")
     y_tmp = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
@@ -129,7 +132,7 @@ y_val = y_set[trainSize:trainSize+validSize]
 x_test = x_set[trainSize+validSize:]
 y_test = y_set[trainSize+validSize:]
 
-epochs = 20
+epochs = 50
 batch_size = 32
 input_shape = (128, 128, 3)
 data_augmentation = False
@@ -140,24 +143,48 @@ x_train /= 255
 x_test /= 255
 
 # model = load_model("keras_model.h5")
+# activation = keras.layers.advanced_activations.ThresholdedReLU(theta=10.0)
+activation = "relu"
+model = Sequential()
+model.add(Conv2D(96, kernel_size=(7,7),
+                 activation=activation,
+                 input_shape=input_shape))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(keras.layers.normalization.BatchNormalization())
+model.add(Conv2D(256, (5, 5), activation=activation))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(keras.layers.normalization.BatchNormalization())
+model.add(Conv2D(384, (3, 3), activation=activation))
+model.add(MaxPooling2D(pool_size=(3, 3)))
+model.add(Flatten())
+model.add(Dense(512, activation=activation))
+model.add(Dropout(0.5))
+model.add(Dense(512, activation=activation))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation="softmax"))
+
+
+"""
+activation = "relu"
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
+                 activation=activation,
                  input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation=activation))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation=activation))
+model.add(Conv2D(32, (3, 3), activation=activation))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(100, activation='relu'))
+model.add(Dense(100, activation=activation))
 model.add(Dropout(0.5))
-model.add(Dense(100, activation='relu'))
+model.add(Dense(100, activation=activation))
 model.add(Dropout(0.25))
 model.add(Dense(num_classes, activation="softmax"))
+"""
 
-opt = optimizers.Adam(lr=0.001)
+opt = optimizers.Adam(lr=0.01)
 # opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 
 
