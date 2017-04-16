@@ -79,7 +79,8 @@ for i in range(3, len(ages)):
 
 
 # num_classes = int(100/interval_length)+2
-num_classes = 7
+num_classes_age = 7
+num_classes_gender = 2
 
 def getAgeCategory(age):
   """
@@ -89,7 +90,8 @@ def getAgeCategory(age):
   """
   # return classes1[int(age)]
   
-  # return age
+  return age
+
   if age < 20:
     return 0
   elif age >= 20 and age < 25:
@@ -107,31 +109,42 @@ def getAgeCategory(age):
 
 
 x_set = np.array([]).reshape(0, 128, 128, 3)
-y_set = np.array([]).reshape(0)
+y_set_age = np.array([]).reshape(0,2)
+y_set_gender = np.array([]).reshape(0,2)
 for it in range(6):
-    x_tmp = np.load("data1000/128_age/xtrain_128_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
+    x_tmp = np.load("data1000/128_age_gender/xtrain_128_" + str(it) + ".dat")
+    y_tmp = np.load("data1000/128_age_gender/ytrain_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
-    y_set = np.append(y_set, y_tmp, axis=0)
+    y_set_age = np.append(y_set_age, y_tmp, axis=0)
+    y_set_gender = np.append(y_set_gender, y_tmp, axis=0)
 
+y_set_age = np.delete(y_set_age, 0, 1)
+y_set_gender = np.delete(y_set_gender, -1, 1)
 
-for i in range(len(y_set)):
-  y_set[i] = getAgeCategory(y_set[i])
+for i in range(len(y_set_age)):
+  y_set_age[i] = getAgeCategory(y_set_age[i])
 
-y_set = keras.utils.to_categorical(y_set, num_classes)
+# y_set_age = keras.utils.to_categorical(y_set_age, num_classes_age)
+y_set_gender = keras.utils.to_categorical(y_set_gender, num_classes_gender)
 
 
 trainSize = int(x_set.shape[0] * 0.7)
 validSize = int(x_set.shape[0] * 0.15)
 
 x_train = x_set[:trainSize]
-y_train = y_set[:trainSize]
-x_val = x_set[trainSize:trainSize+validSize]
-y_val = y_set[trainSize:trainSize+validSize]
-x_test = x_set[trainSize+validSize:]
-y_test = y_set[trainSize+validSize:]
+y_train_age = y_set_age[:trainSize]
+y_train_gender = y_set_gender[:trainSize]
 
-epochs = 25
+x_val = x_set[trainSize:trainSize+validSize]
+y_val_age = y_set_age[trainSize:trainSize+validSize]
+y_val_gender = y_set_gender[trainSize:trainSize+validSize]
+
+x_test = x_set[trainSize+validSize:]
+y_test_age = y_set_age[trainSize+validSize:]
+y_test_gender = y_set_gender[trainSize+validSize:]
+
+epochs_gender = 3
+epochs_age = 20
 batch_size = 32
 input_shape = (128, 128, 3)
 data_augmentation = False
@@ -144,80 +157,127 @@ x_train /= 255
 x_test /= 255
 x_val /= 255
 
-"""
 # model = load_model("keras_model.h5")
-# activation = keras.layers.advanced_activations.ThresholdedReLU(theta=10.0)
-activation = "relu"
-model = Sequential()
-model.add(Conv2D(96, kernel_size=(7,7),
-                 activation=activation,
-                 input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(256, (5, 5), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(384, (3, 3), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Flatten())
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation="softmax"))
-"""
-
-
-activation = "relu"
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation=activation,
+                 activation='relu',
                  input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation=activation))
+model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation=activation))
-model.add(Conv2D(32, (3, 3), activation=activation))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(100, activation=activation))
+model.add(Dense(100, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(100, activation=activation))
+"""
+model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
-model.add(Dense(num_classes, activation="softmax"))
+model.add(Flatten())
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.25))
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.25))
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.5))
+"""
+"""
+model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.5))
+model.add(Flatten())
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.25))
+"""
+
+
+age_model = Sequential()
+age_model.add(model)
+# age_model.add(Dense(num_classes_age, activation="softmax"))
+age_model.add(Dense(1))
+
+gender_model = Sequential()
+gender_model.add(model)
+gender_model.add(Dense(num_classes_gender, activation="sigmoid"))
 
 
 opt = optimizers.Adam(lr=0.001)
 # opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 
-
-model.compile(loss="categorical_crossentropy",#keras.losses.categorical_crossentropy,
+"""
+age_model.compile(loss="categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
+"""
+age_model.compile(loss="mean_squared_error",
+              optimizer=opt,
+              metrics=['mae'])
+gender_model.compile(loss="categorical_crossentropy",#keras.losses.categorical_crossentropy,
+              optimizer=opt,
+              metrics=['accuracy'])
+
 if not data_augmentation:
-  model.fit(x_train, y_train,
+  print("Train gender model")
+  gender_model.fit(x_train, y_train_gender,
             batch_size=batch_size,
-            epochs=epochs,
+            epochs=epochs_gender,
             verbose=1,
-            validation_data=(x_test, y_test),
+            validation_data=(x_test, y_test_gender),
+            shuffle=True)
+  print("Train age model")
+  age_model.fit(x_train, y_train_age,
+            batch_size=batch_size,
+            epochs=epochs_age,
+            verbose=1,
+            validation_data=(x_test, y_test_age),
             shuffle=True)
   
-  score = model.evaluate(x_val, y_val, verbose=1)
-  print('Test loss:', score[0])
-  print('Test accuracy:', score[1])
+  score = gender_model.evaluate(x_val, y_val_gender, verbose=1)
+  print('(Gender) Test loss:', score[0])
+  print('(Gender) Test accuracy:', score[1])
+
+  score = age_model.evaluate(x_val, y_val_age, verbose=1)
+  print('(Age) Test loss:', score[0])
+  print('(Age) Test accuracy:', score[1])
   
-  model.save('keras_model_age_classif.h5')
+  # model.save('keras_model_age.h5')
   
   
-  pred = model.predict(x_test)
+  pred = gender_model.predict(x_test)
   # print(pred)
   for i in range(len(pred)):
-  	print(str(pred[i]) + " => " + str(y_test[i]))
-  print('Test loss:', score[0])
-  print('Test accuracy:', score[1])
+  	print(str(pred[i]) + " => " + str(y_test_gender[i]))
+  print('(Gender) Test loss:', score[0])
+  print('(Gender) Test accuracy:', score[1])
   
+  pred = age_model.predict(x_test)
+  # print(pred)
+  for i in range(len(pred)):
+    print(str(pred[i]) + " => " + str(y_test_age[i]))
+  print('(Age) Test loss:', score[0])
+  print('(Age) Test accuracy:', score[1])
+
 
 else:
+  """
     print('Using real-time data augmentation.')
     # This will do preprocessing and realtime data augmentation:
     datagen = ImageDataGenerator(
@@ -247,3 +307,4 @@ else:
     print('Test accuracy:', score[1])
     pred = model.predict(x_test)
     print(pred)
+  """

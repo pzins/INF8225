@@ -65,10 +65,13 @@ data_augmentation = True
 
 
 
+
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
+x_val = x_val.astype('float32')
 x_train /= 255
 x_test /= 255
+x_val /= 255
 
 # model = load_model("keras_model.h5")
 model = Sequential()

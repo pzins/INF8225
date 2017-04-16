@@ -57,7 +57,7 @@ def getAgeCategory(age):
 data = sio.loadmat("wiki.mat")
 # print(data.shape)
 d = data["wiki"]
-taille_img_out = 128
+taille_img_out = 32
 nb_categories = 2
 
 a = np.array(d[0][0][2][:][0])
@@ -66,7 +66,7 @@ dataset_size = a.shape[0]
 a = a[:60000]
 print(dataset_size)
 
-batchSize = 10000
+batchSize = 10
 
 for it in range(int(dataset_size/batchSize)):
 
@@ -133,8 +133,9 @@ for it in range(int(dataset_size/batchSize)):
 			test = 1
 			print(counter)
 
-			# cv2.imshow("Face found", im)
-			# cv2.waitKey(0)
+			print("ol", b[counter])
+			cv2.imshow("Face found", img)
+			cv2.waitKey(0)
 
 			# save img file	
 			# if counter < 250:	
@@ -157,8 +158,8 @@ for it in range(int(dataset_size/batchSize)):
 	# y_train = keras.utils.to_categorical(y_train, nb_categories)
 	# x_train = np.expand_dims(x_train, 4)
 
-	x_train.dump("data1000/128_age_gender/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
-	y_train.dump("data1000/128_age_gender/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	x_train.dump("data1000/32_age_gender/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	y_train.dump("data1000/32_age_gender/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
 #data7 => test
 #data6 => size 128 + colored
 #data4 => size 250	

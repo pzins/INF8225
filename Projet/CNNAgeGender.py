@@ -79,7 +79,7 @@ for i in range(3, len(ages)):
 
 
 # num_classes = int(100/interval_length)+2
-num_classes = 7
+num_classes = 14
 
 def getAgeCategory(age):
   """
@@ -90,33 +90,36 @@ def getAgeCategory(age):
   # return classes1[int(age)]
   
   # return age
-  if age < 20:
-    return 0
-  elif age >= 20 and age < 25:
-    return 1
-  elif age >= 25 and age < 30:
-    return 2
-  elif age >= 30 and age < 35:
-    return 3
-  elif age >= 35 and age < 45:
-    return 4
-  elif age >= 45 and age < 60:
-    return 5
+  gender = 0
+  if age[0] == 1:
+    gender = 7
+  if age[1] < 20:
+    return gender + 0
+  elif age[1] >= 20 and age[1] < 25:
+    return gender + 1
+  elif age[1] >= 25 and age[1] < 30:
+    return gender + 2
+  elif age[1] >= 30 and age[1] < 35:
+    return gender + 3
+  elif age[1] >= 35 and age[1] < 45:
+    return gender + 4
+  elif age[1] >= 45 and age[1] < 60:
+    return gender + 5
   else:
-    return 6
+    return gender + 6
 
 
 x_set = np.array([]).reshape(0, 128, 128, 3)
-y_set = np.array([]).reshape(0)
+y_set_tmp = np.array([]).reshape(0,2)
 for it in range(6):
-    x_tmp = np.load("data1000/128_age/xtrain_128_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
+    x_tmp = np.load("data1000/128_age_gender/xtrain_128_" + str(it) + ".dat")
+    y_tmp = np.load("data1000/128_age_gender/ytrain_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
-    y_set = np.append(y_set, y_tmp, axis=0)
+    y_set_tmp = np.append(y_set_tmp, y_tmp, axis=0)
+y_set = np.zeros(y_set_tmp.shape[0])
 
-
-for i in range(len(y_set)):
-  y_set[i] = getAgeCategory(y_set[i])
+for i in range(len(y_set_tmp)):
+  y_set[i] = getAgeCategory(y_set_tmp[i])
 
 y_set = keras.utils.to_categorical(y_set, num_classes)
 
@@ -131,7 +134,7 @@ y_val = y_set[trainSize:trainSize+validSize]
 x_test = x_set[trainSize+validSize:]
 y_test = y_set[trainSize+validSize:]
 
-epochs = 25
+epochs = 50
 batch_size = 32
 input_shape = (128, 128, 3)
 data_augmentation = False
@@ -144,45 +147,41 @@ x_train /= 255
 x_test /= 255
 x_val /= 255
 
-"""
 # model = load_model("keras_model.h5")
-# activation = keras.layers.advanced_activations.ThresholdedReLU(theta=10.0)
-activation = "relu"
-model = Sequential()
-model.add(Conv2D(96, kernel_size=(7,7),
-                 activation=activation,
-                 input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(256, (5, 5), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(384, (3, 3), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Flatten())
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation="softmax"))
 """
-
-
-activation = "relu"
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation=activation,
+                 activation='relu',
                  input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation=activation))
+model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation=activation))
-model.add(Conv2D(32, (3, 3), activation=activation))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+model.add(Flatten())
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.25))
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.25))
+model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_classes, activation='softmax'))
+"""
+model = Sequential()
+model.add(Conv2D(32, kernel_size=(3, 3),
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(100, activation=activation))
+model.add(Dense(100, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(100, activation=activation))
+model.add(Dense(100, activation='relu'))
 model.add(Dropout(0.25))
 model.add(Dense(num_classes, activation="softmax"))
 
@@ -206,7 +205,7 @@ if not data_augmentation:
   print('Test loss:', score[0])
   print('Test accuracy:', score[1])
   
-  model.save('keras_model_age_classif.h5')
+  model.save('keras_model_age.h5')
   
   
   pred = model.predict(x_test)

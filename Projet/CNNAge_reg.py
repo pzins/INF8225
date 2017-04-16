@@ -12,7 +12,9 @@ import glob
 from keras import optimizers
 from keras.models import load_model
 
+from keras.losses import *
 
+from keras.layers import Activation
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.preprocessing.image import ImageDataGenerator
@@ -20,20 +22,6 @@ from keras.preprocessing.image import ImageDataGenerator
 #CNN
 #------------------------------------------------------
 
-"""
-index = np.arange(x.shape[0])
-np.random.shuffle(index)
-
-sizeTrain = int(x.shape[0] * 0.6)
-sizeValTest = int(x.shape[0] * 0.2)
-
-x_train = x[index[:sizeTrain]]
-x_valid = x[index[sizeTrain:sizeTrain+sizeValTest]]
-x_test = x[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-y_train = y[index[:sizeTrain]]
-y_valid = y[index[sizeTrain:sizeTrain+sizeValTest]]
-y_test = y[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-"""
 x_set = np.array([]).reshape(0, 128, 128, 3)
 y_set = np.array([]).reshape(0)
 for it in range(6):
@@ -54,39 +42,46 @@ y_val = y_set[trainSize:trainSize+validSize]
 x_test = x_set[trainSize+validSize:]
 y_test = y_set[trainSize+validSize:]
 
+
+
 epochs = 20
 batch_size = 64
 input_shape = (128, 128, 3)
-data_augmentation = False
+data_augmentation = True
 
 
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
+x_val = x_val.astype('float32')
 x_train /= 255
 x_test /= 255
+x_val /= 255
 
 # model = load_model("keras_model.h5")
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
+                 input_shape=input_shape,
+                 kernel_initializer="he_normal"))
+model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer="he_normal"))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer="he_normal"))
+model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer="he_normal"))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
+model.add(Dropout(0.25))
 model.add(Flatten())
-model.add(Dense(100, activation='relu'))
+model.add(Dense(128, activation='relu', kernel_initializer="he_normal"))
 model.add(Dropout(0.5))
 model.add(Dense(1 ))
-
 
 # opt = optimizers.Adam(lr=0.01)
 opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 
 
-model.compile(loss="mean_squared_error",#keras.losses.categorical_crossentropy,
+def myloss(y_true, y_pred):
+  return mean_squared_error(y_true[0], y_pred)
+
+model.compile(loss=mean_squared_error,
               optimizer=opt,
               metrics=['mae'])
 
@@ -102,7 +97,7 @@ if not data_augmentation:
   print('Test loss:', score[0])
   print('Test accuracy:', score[1])
   
-  # model.save('keras_model_age.h5')
+  model.save('age_reg_model.h5')
   
   pred = model.predict(x_test)
   for i in range(len(pred)):
@@ -143,30 +138,12 @@ else:
     print('Test accuracy:', score[1])
     pred = model.predict(x_test)
     # print(pred)
+    f = open("res.txt", "w")
     for i in range(len(pred)):
-      print(str(pred[i]) + " => " + str(y_test[i]))
+      ss = str(y_test[i]) + ";" + str(abs(np.around(pred[i])-y_test[i])) + ";" + str(np.around(pred[i])-y_test[i]) + "\n"
+      f.write(ss)
+      # print(str(pred[i]) + " => " + str(y_test[i]))
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
 
-"""
-8.5 error
-20 ite
-batch 64
-sans data aug
-
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
-model.add(Flatten())
-model.add(Dense(100, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1 ))
-"""

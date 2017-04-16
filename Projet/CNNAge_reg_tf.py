@@ -11,21 +11,15 @@ time = str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now
 x_set = np.array([]).reshape(0, 32, 32, 3)
 y_set = np.array([]).reshape(0, 2)
 # ages = np.array([]).reshape(0, 1)
-for it in range(6):
-    x_tmp = np.load("data1000/32_large/xtrain_32_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/32_large/ytrain_32_" + str(it) + ".dat")
+for it in range(1):
+    x_tmp = np.load("data1000/32_age_gender/xtrain_32_" + str(it) + ".dat")
+    y_tmp = np.load("data1000/32_age_gender/ytrain_32_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
     
     # age = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
     # ages = np.append(ages, age)
-
 # ages = np.expand_dims(ages, axis=1)
-
-
-
-
-
 
 # create train, valid and test set
 trainSize = int(x_set.shape[0] * 0.9)
@@ -41,7 +35,7 @@ y_test = y_set[trainSize+validSize:]
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 1
+training_epochs = 10
 batch_size = 32
 nb_batch = int(x_train.shape[0]/batch_size)
 log_dir = "/home/pierre/Dev/CNN/Tensorboard/" + time
@@ -100,6 +94,7 @@ def conv_net(x, weights, biases, dropout):
 
     # Output, class prediction
     out = tf.add(tf.matmul(fc2, weights['out']), biases['out'])
+    
     return out
 
 
@@ -136,7 +131,7 @@ biases = {
 pred = conv_net(x, weights, biases, keep_prob)
 
 # Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+cost = tf.reduce_mean(tf.squared_difference(pred, y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # Evaluate model
