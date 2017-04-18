@@ -2,7 +2,6 @@ from __future__ import print_function
 import keras
 from keras.datasets import mnist
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
@@ -18,34 +17,16 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2
 from keras.layers.normalization import BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
 
-#CNN
-#------------------------------------------------------
-
-"""
-index = np.arange(x.shape[0])
-np.random.shuffle(index)
-
-sizeTrain = int(x.shape[0] * 0.6)
-sizeValTest = int(x.shape[0] * 0.2)
-
-x_train = x[index[:sizeTrain]]
-x_valid = x[index[sizeTrain:sizeTrain+sizeValTest]]
-x_test = x[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-y_train = y[index[:sizeTrain]]
-y_valid = y[index[sizeTrain:sizeTrain+sizeValTest]]
-y_test = y[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-"""
-x_set = np.array([]).reshape(0, 32, 32, 3) #(0, 50, 50, 1)
+# load data
+x_set = np.array([]).reshape(0, 32, 32, 3)
 y_set = np.array([]).reshape(0, 2)
 for it in range(6):
-    x_tmp = np.load("data1000/32_large/xtrain_32_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/32_large/ytrain_32_" + str(it) + ".dat")
+    x_tmp = np.load("data/x_32_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_32_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
 
 # x_set = np.squeeze(x_set)
-print(x_set.shape)
-print(y_set.shape)
 
 trainSize = int(x_set.shape[0] * 0.7)
 validSize = int(x_set.shape[0] * 0.15)
@@ -60,10 +41,8 @@ y_test = y_set[trainSize+validSize:]
 epochs = 100
 batch_size = 32
 num_classes = 2
-input_shape = (32, 32, 3) #(50, 50, 1)
+input_shape = (32, 32, 3)
 data_augmentation = True
-
-
 
 
 x_train = x_train.astype('float32')
@@ -73,10 +52,10 @@ x_train /= 255
 x_test /= 255
 x_val /= 255
 
+# load saved model
 # model = load_model("keras_model.h5")
-model = Sequential()
 
-
+# CNN network
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
@@ -97,12 +76,12 @@ model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='sigmoid'))
 
 
-
+# Optimizer
 opt = optimizers.Adam(lr=0.001)
 # opt = keras.optimizers.RMSprop(lr=0.01, rho=0.9, epsilon=1e-08, decay=0.0005)
 
 
-model.compile(loss="categorical_crossentropy",#keras.losses.categorical_crossentropy,
+model.compile(loss="categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
 
@@ -118,9 +97,9 @@ if not data_augmentation:
 	print('Test loss:', score[0])
 	print('Test accuracy:', score[1])
 
-	# model.save('keras_model.h5')
-
-
+  # save model
+  # model.save('gender_classification.h5')  
+  
 	pred = model.predict(x_test)
 	print(pred)
 	# for i in range(len(pred)):
@@ -156,166 +135,9 @@ else:
     score = model.evaluate(x_test, y_test, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
+
+    # save model
+    # model.save('gender_classification.h5')  
+
     pred = model.predict(x_test)
     print(pred)
-
-
-"""
-# model 0.9
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-model.add(Flatten())
-model.add(Dense(512, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-"""
-
-
-"""
-# model 0.94
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(num_classes, activation='softmax'))
-"""
-
-"""
-#model paper gil
-model = Sequential()
-model.add(Conv2D(96, kernel_size=(7, 7),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(BatchNormalization())
-model.add(Conv2D(256, (5, 5), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(BatchNormalization())
-model.add(Conv2D(384, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(512, activation='softmax'))
-model.add(Dense(512, activation='softmax'))
-model.add(Dense(num_classes, activation='softmax'))
-"""
-
-"""
-error training : 0.98
-error test 0.91
-500 iterations
-batch size 100
-img color 32x32
-que certaines data (environ 5000)
-pas trop long
-
-pareil avec ttes les datas
-500 itérations
-batch size 100
-img color 32x32
-error training : 0.95
-error test : 0.92
-1h15
-
-tt areil mais sans data augmentation
-error training : 0.998
-teset training : 0.87
-
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-# model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
-model.add(Flatten())
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-"""
-
-"""
-model vg6 de l'article
-
-model = Sequential()
-model.add(Conv2D(64, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(128, (3, 3), activation='relu'))
-model.add(Conv2D(128, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(512, activation='softmax'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-"""
-
-
-"""
-Apparent Age Estimation Using Ensemble of Deep Learning Models
-1606.02909.pdf
-
-age estimation avec 3 VGGNet différent avc les même input
-mais des age category shifted
-ensuite moyennes des 3 ages prédits
-
-
-Levi:
-Age et gender separement
-3 conv layer : bcp filtres et assez grds
-cette archi marchait pas bien chez moi
-
-
-deep_gender
-Jia Cristianini
-
-gender : 
-3 VGGNet de plus en plus profond (+ profond => better result)
-mais chez moi que le premier est possible
-
-essai avec margin en plus autour des cropped img => améliore un peu result
-
-experiment avc des faces mauvaise, nn centrées, ...
-"""
-
-"""
-meilleur pr l'instant
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
-                 activation='relu',
-                 input_shape=input_shape))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.5))
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='sigmoid'))
-"""

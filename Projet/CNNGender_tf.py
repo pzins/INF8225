@@ -5,27 +5,19 @@ import numpy as np
 import datetime
 now = datetime.datetime.now()
 
-
+# time for folder tensorboard
 time = str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "h" + str(now.minute)
+
 # import data
 x_set = np.array([]).reshape(0, 32, 32, 3)
 y_set = np.array([]).reshape(0, 2)
 # ages = np.array([]).reshape(0, 1)
 for it in range(6):
-    x_tmp = np.load("data1000/32_large/xtrain_32_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/32_large/ytrain_32_" + str(it) + ".dat")
+    x_tmp = np.load("data/x_32_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_32_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
     
-    # age = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
-    # ages = np.append(ages, age)
-
-# ages = np.expand_dims(ages, axis=1)
-
-
-
-
-
 
 # create train, valid and test set
 trainSize = int(x_set.shape[0] * 0.9)
@@ -44,7 +36,7 @@ learning_rate = 0.001
 training_epochs = 1
 batch_size = 32
 nb_batch = int(x_train.shape[0]/batch_size)
-log_dir = "/home/pierre/Dev/CNN/Tensorboard/" + time
+log_dir = "Tensorboard/" + time
 
 
 # Network Parameters

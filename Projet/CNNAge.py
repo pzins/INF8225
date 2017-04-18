@@ -17,32 +17,8 @@ from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.preprocessing.image import ImageDataGenerator
 
-#CNN
-#------------------------------------------------------
-
+#3 shifted class as in the paper Apparent Age Estimation Using Ensemble of Deep Learning Models
 """
-index = np.arange(x.shape[0])
-np.random.shuffle(index)
-
-sizeTrain = int(x.shape[0] * 0.6)
-sizeValTest = int(x.shape[0] * 0.2)
-
-x_train = x[index[:sizeTrain]]
-x_valid = x[index[sizeTrain:sizeTrain+sizeValTest]]
-x_test = x[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-y_train = y[index[:sizeTrain]]
-y_valid = y[index[sizeTrain:sizeTrain+sizeValTest]]
-y_test = y[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-"""
-# group age into categories
-# -1 => error
-# 0 => <20
-# 1 => 20-30
-# 2 => 30-40
-# 3 => 40-50
-# 4 => 50-60
-# 5 => >60
-
 age_interval = 101
 interval_length = 10
 ages = np.arange(age_interval)
@@ -74,22 +50,15 @@ for i in range(3, len(ages)):
   if counter == interval_length:
     cur_class += 1
     counter = 0
-# les trois classes shifted comme ds l'article
+
+num_classes = int(100/interval_length)+2
+"""
 
 
-
-# num_classes = int(100/interval_length)+2
 num_classes = 7
 
+# return age category
 def getAgeCategory(age):
-  """
-  if age<50:
-    return 0
-  return 1
-  """
-  # return classes1[int(age)]
-  
-  # return age
   if age < 20:
     return 0
   elif age >= 20 and age < 25:
@@ -106,21 +75,24 @@ def getAgeCategory(age):
     return 6
 
 
+# load data
 x_set = np.array([]).reshape(0, 128, 128, 3)
 y_set = np.array([]).reshape(0)
 for it in range(6):
-    x_tmp = np.load("data1000/128_age/xtrain_128_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
+    x_tmp = np.load("data/x_128_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
 
-
+# get age category from age
 for i in range(len(y_set)):
   y_set[i] = getAgeCategory(y_set[i])
 
+# transform to onehot vector
 y_set = keras.utils.to_categorical(y_set, num_classes)
 
 
+# split training, validation and test set
 trainSize = int(x_set.shape[0] * 0.7)
 validSize = int(x_set.shape[0] * 0.15)
 
@@ -137,6 +109,7 @@ input_shape = (128, 128, 3)
 data_augmentation = False
 
 
+
 x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_val = x_val.astype('float32')
@@ -144,30 +117,8 @@ x_train /= 255
 x_test /= 255
 x_val /= 255
 
-"""
-# model = load_model("keras_model.h5")
-# activation = keras.layers.advanced_activations.ThresholdedReLU(theta=10.0)
-activation = "relu"
-model = Sequential()
-model.add(Conv2D(96, kernel_size=(7,7),
-                 activation=activation,
-                 input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(256, (5, 5), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(keras.layers.normalization.BatchNormalization())
-model.add(Conv2D(384, (3, 3), activation=activation))
-model.add(MaxPooling2D(pool_size=(3, 3)))
-model.add(Flatten())
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(512, activation=activation))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation="softmax"))
-"""
 
-
+# CNN network
 activation = "relu"
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
@@ -187,13 +138,15 @@ model.add(Dropout(0.25))
 model.add(Dense(num_classes, activation="softmax"))
 
 
+# optimizer
 opt = optimizers.Adam(lr=0.001)
 # opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 
 
-model.compile(loss="categorical_crossentropy",#keras.losses.categorical_crossentropy,
+model.compile(loss="categorical_crossentropy",
               optimizer=opt,
               metrics=['accuracy'])
+
 if not data_augmentation:
   model.fit(x_train, y_train,
             batch_size=batch_size,
@@ -202,15 +155,15 @@ if not data_augmentation:
             validation_data=(x_test, y_test),
             shuffle=True)
   
-  score = model.evaluate(x_val, y_val, verbose=1)
+  score = model.evaluate(x_test, y_test, verbose=1)
   print('Test loss:', score[0])
   print('Test accuracy:', score[1])
   
-  model.save('keras_model_age_classif.h5')
+  # save model
+  # model.save('age_classification.h5')
   
   
   pred = model.predict(x_test)
-  # print(pred)
   for i in range(len(pred)):
   	print(str(pred[i]) + " => " + str(y_test[i]))
   print('Test loss:', score[0])
@@ -242,8 +195,16 @@ else:
                          steps_per_epoch=x_train.shape[0] // batch_size,
                          epochs=epochs,
                          validation_data=(x_val, y_val))
-    score = model.evaluate(x_test, y_test, verbose=1)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
-    pred = model.predict(x_test)
-    print(pred)
+  
+  score = model.evaluate(x_test, y_test, verbose=1)
+  print('Test loss:', score[0])
+  print('Test accuracy:', score[1])
+    
+  # save model
+  # model.save('age_classification.h5')  
+  
+  pred = model.predict(x_test)
+  for i in range(len(pred)):
+    print(str(pred[i]) + " => " + str(y_test[i]))
+  print('Test loss:', score[0])
+  print('Test accuracy:', score[1])

@@ -21,103 +21,19 @@ from keras.metrics import *
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.preprocessing.image import ImageDataGenerator
 
-#CNN
-#------------------------------------------------------
-
-"""
-index = np.arange(x.shape[0])
-np.random.shuffle(index)
-
-sizeTrain = int(x.shape[0] * 0.6)
-sizeValTest = int(x.shape[0] * 0.2)
-
-x_train = x[index[:sizeTrain]]
-x_valid = x[index[sizeTrain:sizeTrain+sizeValTest]]
-x_test = x[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-y_train = y[index[:sizeTrain]]
-y_valid = y[index[sizeTrain:sizeTrain+sizeValTest]]
-y_test = y[index[sizeTrain+sizeValTest:sizeTrain+sizeValTest*2]]
-"""
-# group age into categories
-# -1 => error
-# 0 => <20
-# 1 => 20-30
-# 2 => 30-40
-# 3 => 40-50
-# 4 => 50-60
-# 5 => >60
-
-age_interval = 101
-interval_length = 10
-ages = np.arange(age_interval)
-classes1 = np.zeros(age_interval)
-classes2 = np.zeros(age_interval)
-classes3 = np.zeros(age_interval)
-cur_class = 1
-counter = 0
-
-for i in range(1, len(ages)):
-  classes1[i] = cur_class
-  counter += 1
-  if counter == interval_length:
-    cur_class += 1
-    counter = 0
-
-cur_class = 1
-for i in range(2, len(ages)):
-  classes2[i] = cur_class
-  counter += 1
-  if counter == interval_length:
-    cur_class += 1
-    counter = 0
-
-cur_class = 1
-for i in range(3, len(ages)):
-  classes3[i] = cur_class
-  counter += 1
-  if counter == interval_length:
-    cur_class += 1
-    counter = 0
-# les trois classes shifted comme ds l'article
 
 
-
-# num_classes = int(100/interval_length)+2
-num_classes_age = 7
 num_classes_gender = 2
 
-def getAgeCategory(age):
-  """
-  if age<50:
-    return 0
-  return 1
-  """
-  # return classes1[int(age)]
-  
+def getAgeCategory(age):  
   return age
-
-  if age < 20:
-    return 0
-  elif age >= 20 and age < 25:
-    return 1
-  elif age >= 25 and age < 30:
-    return 2
-  elif age >= 30 and age < 35:
-    return 3
-  elif age >= 35 and age < 45:
-    return 4
-  elif age >= 45 and age < 60:
-    return 5
-  else:
-    return 6
-
 
 x_set = np.array([]).reshape(0, 128, 128, 3)
 y_set_age = np.array([]).reshape(0,2)
 y_set_gender = np.array([]).reshape(0,2)
-for it in range(4):
-    x_tmp = np.load("data1000/128_age_gender/xtrain_128_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/128_age_gender/ytrain_128_" + str(it) + ".dat")
+for it in range(1):
+    x_tmp = np.load("data/x_128_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set_age = np.append(y_set_age, y_tmp, axis=0)
     y_set_gender = np.append(y_set_gender, y_tmp, axis=0)
@@ -128,10 +44,10 @@ y_set_gender = np.delete(y_set_gender, -1, 1)
 for i in range(len(y_set_age)):
   y_set_age[i] = getAgeCategory(y_set_age[i])
 
-# y_set_age = keras.utils.to_categorical(y_set_age, num_classes_age)
 y_set_gender = keras.utils.to_categorical(y_set_gender, num_classes_gender)
 
 y_set = np.column_stack((y_set_age, y_set_gender))
+
 
 
 trainSize = int(x_set.shape[0] * 0.7)
@@ -187,18 +103,12 @@ b.add(Dense(2, activation="softmax"))
 
 model = Sequential()
 model.add(Merge([a, b], mode = 'concat'))
-model.add(Dense(3))
-
+# model.add(Dense(3))
+print(y_val.shape)
+# exit()
 
 def _loss_tensor(y_true, y_pred):
-  a = y_true[:,:3]
-  # print(y_true[1:].shape)
-  # print(y_pred[1:].shape)
-  # print(y_pred[0,:].shape)
-  # print(y_true[0,:].shape)
-  print(a.shape)
-  return categorical_crossentropy(y_true[1:], y_pred[1:y_pred.shape[0]-3])
-  return mean_squared_error(y_true[0], y_pred[0]) + categorical_crossentropy(y_true[1:2], y_pred[1:2])
+  return mean_squared_error(y_true[0], y_pred[0]) + categorical_crossentropy(y_true[1:3], y_pred[1:3])
 
     # y_pred = K.clip(y_pred, _EPSILON, 1.0-_EPSILON)
     # out = -(y_true * K.log(y_pred) + (1.0 - y_true) * K.log(1.0 - y_pred))
@@ -210,8 +120,8 @@ def mean_pred(y_true, y_pred):
   return mean_absolute_error(y_true[0], y_pred[0])
 
 
-# opt = optimizers.Adam(lr=0.001)
-opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
+opt = optimizers.Adam(lr=0.001)
+# opt = keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
 
 model.compile(loss=_loss_tensor,
               optimizer=opt,
@@ -223,7 +133,7 @@ if not data_augmentation:
             batch_size=batch_size,
             epochs=epochs,
             verbose=1,
-            validation_data=(x_test, y_test),
+            validation_data=(x_val, y_val),
             shuffle=True)
   
   score = model.evaluate(x_val, y_val, verbose=1)

@@ -24,8 +24,8 @@ import tensorflow as tf
 x_set = np.array([]).reshape(0, 128, 128, 3) #(0, 50, 50, 1)
 y_set = np.array([]).reshape(0)
 for it in range(1):
-    x_tmp = np.load("data1000/128_age/xtrain_128_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/128_age/ytrain_128_" + str(it) + ".dat")
+    x_tmp = np.load("data/x_128_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_128_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
 
@@ -70,8 +70,8 @@ img_aug.add_random_flip_leftright()
 img_aug.add_random_rotation(max_angle=5)
 img_aug.add_random_blur (sigma_max=5.0)
 
-def l1_norm(prediction, target, inputs):
-    return tf.reduce_sum(tf.abs(prediction - target), name='l1')
+def l1_norm(prediction, target):
+    return tf.reduce_sum(tf.abs(prediction - target))
 
 # Convolutional network building
 network = input_data(shape=input_shape,
@@ -88,7 +88,7 @@ network = fully_connected(network, 128, activation='relu')
 network = dropout(network, 0.5)
 network = fully_connected(network, 1)
 network = regression(network, optimizer='adam',
-                     loss=tflearn.L2,
+                     loss=l1_norm,
                      learning_rate=0.001)
 
 

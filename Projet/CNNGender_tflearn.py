@@ -18,21 +18,18 @@ from tflearn.layers.estimator import regression
 from tflearn.data_preprocessing import ImagePreprocessing
 from tflearn.data_augmentation import ImageAugmentation
 
-#CNN
-#------------------------------------------------------
 
-x_set = np.array([]).reshape(0, 32, 32, 3) #(0, 50, 50, 1)
+#load data
+x_set = np.array([]).reshape(0, 32, 32, 3)
 y_set = np.array([]).reshape(0, 2)
 for it in range(6):
-    x_tmp = np.load("data1000/32_large/xtrain_32_" + str(it) + ".dat")
-    y_tmp = np.load("data1000/32_large/ytrain_32_" + str(it) + ".dat")
+    x_tmp = np.load("data/x_32_" + str(it) + ".dat")
+    y_tmp = np.load("data/y_32_" + str(it) + ".dat")
     x_set = np.append(x_set, x_tmp, axis=0)
     y_set = np.append(y_set, y_tmp, axis=0)
 
-# x_set = np.squeeze(x_set)
-print(x_set.shape)
-print(y_set.shape)
 
+# create training, validation and test set
 trainSize = int(x_set.shape[0] * 0.7)
 validSize = int(x_set.shape[0] * 0.25)
 
@@ -43,13 +40,12 @@ y_val = y_set[trainSize:trainSize+validSize]
 x_test = x_set[trainSize+validSize:]
 y_test = y_set[trainSize+validSize:]
 
+# parameters
 epochs = 100
 batch_size = 32
 num_classes = 2
 input_shape = (32, 32, 3) #(50, 50, 1)
 data_augmentation = True
-
-
 
 
 x_train = x_train.astype('float32')
@@ -58,6 +54,8 @@ x_val = x_val.astype('float32')
 x_train /= 255
 x_test /= 255
 x_val /= 255
+
+
 # Real-time data preprocessing
 img_prep = ImagePreprocessing()
 img_prep.add_featurewise_zero_center()
@@ -91,12 +89,12 @@ network = regression(network, optimizer='adam',
 
 model = tflearn.DNN(network, tensorboard_verbose=3)
 
-# model.load("mymodel.tflearn")
+# model.load("gender_model.tflearn")
 
 model.fit(x_train, y_train, n_epoch=50, shuffle=True, validation_set=(x_val, y_val),
           show_metric=True, batch_size=512, run_id='gender_margin')  
 
-model.save("CNNGender_32_large.tflearn")
+model.save("gender_model.tflearn")
 
 
 e = model.evaluate(x_test, y_test)

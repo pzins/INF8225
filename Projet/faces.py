@@ -5,22 +5,19 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-import numpy as np
-from PIL import Image
-import glob
-#CNN
-#------------------------------------------------------
 
-import cv2
-import numpy as np
-import glob
-from PIL import Image
 import scipy.io as sio
+import scipy.misc
+
+import numpy as np
+from PIL import Image
+import glob
+import cv2
 import datetime
 from datetime import *
 
-import scipy.misc
 
+# get age
 def getAge(dob, photo_date):
 	dob = np.asscalar(dob)
 	python_datetime = datetime.fromordinal(int(dob)) + timedelta(days=dob%1) - timedelta(days = 366)
@@ -37,6 +34,7 @@ def getAge(dob, photo_date):
 # 3 => 40-50
 # 4 => 50-60
 # 5 => >60
+# get age category (no more used, now categories are made later in CNNAge.py script)
 def getAgeCategory(age):
 	if age < 10 or age > 100:
 		return -1
@@ -55,7 +53,6 @@ def getAgeCategory(age):
 
 
 data = sio.loadmat("wiki.mat")
-# print(data.shape)
 d = data["wiki"]
 taille_img_out = 32
 nb_categories = 2
@@ -64,7 +61,6 @@ a = np.array(d[0][0][2][:][0])
 
 dataset_size = a.shape[0]
 a = a[:60000]
-print(dataset_size)
 
 batchSize = 10
 
@@ -80,13 +76,9 @@ for it in range(int(dataset_size/batchSize)):
 	for i in range(len(dob)):
 		# dob[i] = getAgeCategory(getAge(dob[i], photo_date[i]))
 		dob[i] = getAge(dob[i], photo_date[i])
+	
+	# if we want both informations : gender and age
 	b = np.column_stack((b,dob))
-
-
-	# c = np.array(d[0][0][5][:][0][:taille])
-	# e = np.array(d[0][0][2][:][0][:taille])
-	# f = np.array(d[0][0][4][:][0][:taille])
-	# g = np.array(d[0][0][6][:][0][:taille])
 
 
 	casc = "haarcascade_frontalface_default.xml"
@@ -96,14 +88,11 @@ for it in range(int(dataset_size/batchSize)):
 	label = []
 	counter = 0
 	for img in x_train:
-		# img = cv2.imread(image)
 		
-		# if len(img.shape) == 3:
-			# img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 		if len(img.shape) == 2:
 			counter += 1
 			continue
-		# img =cv2.equalizeHist(img )
+
 		faces = faceCascade.detectMultiScale(
 			img,
 			scaleFactor=1.1,
@@ -112,9 +101,7 @@ for it in range(int(dataset_size/batchSize)):
 			flags=cv2.CASCADE_SCALE_IMAGE)
 		test = 0
 		for (x,y,w,h) in faces:
-			# print(w,h)
-			# w = 46
-			# h = 56
+			
 			# cv2.rectangle(img, (x,y), (x+w, y+h), (0,255,0), 2)
 			
 			#enlarge bounding box
@@ -131,19 +118,18 @@ for it in range(int(dataset_size/batchSize)):
 			im = cv2.resize(im, (taille_img_out, taille_img_out))
 			real_set.append(im)
 			test = 1
-			print(counter)
 
-			print("ol", b[counter])
-			cv2.imshow("Face found", img)
-			cv2.waitKey(0)
+			# show image with face detection
+			# cv2.imshow("Face found", img)
+			# cv2.waitKey(0)
 
-			# save img file	
+			# save img file	to see result
 			# if counter < 250:	
 				# name = "test/" + str(counter) + "_" + str(int(b[counter])) + '.jpg'
 				# scipy.misc.imsave(name, im)
 			break
+
 		if test == 1:
-			# if np.isnan(b[counter]) or b[counter] == -1:
 			if np.isnan(b[counter][0]) or b[counter][1] == -1:
 				real_set.pop()
 			else:
@@ -151,18 +137,16 @@ for it in range(int(dataset_size/batchSize)):
 
 		counter += 1
 
-		# cv2.destroyAllWindows()
 
 	x_train = np.asarray(real_set)
 	y_train = np.array(label)
+
+	# for gender, we do one-hot vector
 	# y_train = keras.utils.to_categorical(y_train, nb_categories)
+	
+
 	# x_train = np.expand_dims(x_train, 4)
 
-	x_train.dump("data1000/32_age_gender/xtrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
-	y_train.dump("data1000/32_age_gender/ytrain_" + str(taille_img_out) + "_" + str(it) + ".dat")
-#data7 => test
-#data6 => size 128 + colored
-#data4 => size 250	
-#data5 => size 128
-#data3 => avc age regression
-#data2 => avc age category
+	# save matrices : input data x and labels y
+	x_train.dump("data/x_" + str(taille_img_out) + "_" + str(it) + ".dat")
+	y_train.dump("data/y_" + str(taille_img_out) + "_" + str(it) + ".dat")

@@ -19,18 +19,18 @@ from keras.preprocessing.image import ImageDataGenerator
 import cv2
 #CNN
 
-files = ["/home/pierre/Dev/CNN/test_data/p1.png",
-		 "/home/pierre/Dev/CNN/test_data/p2.png",
-		 "/home/pierre/Dev/CNN/test_data/p3.png",
-		 "/home/pierre/Dev/CNN/test_data/p4.png",
-		 "/home/pierre/Dev/CNN/test_data/p5.png",
-		 "/home/pierre/Dev/CNN/test_data/p6.png",
-		 "/home/pierre/Dev/CNN/test_data/p7.png",
-		 "/home/pierre/Dev/CNN/test_data/p8.png",
-		 "/home/pierre/Dev/CNN/test_data/p9.png",
-		 "/home/pierre/Dev/CNN/test_data/p10.png",
-		 "/home/pierre/Dev/CNN/test_data/p11.png",
-		 "/home/pierre/Dev/CNN/test_data/p12.png"
+files = ["test_data/p1.png",
+		 "test_data/p2.png",
+		 "test_data/p3.png",
+		 "test_data/p4.png",
+		 "test_data/p5.png",
+		 "test_data/p6.png",
+		 "test_data/p7.png",
+		 "test_data/p8.png",
+		 "test_data/p9.png",
+		 "test_data/p10.png",
+		 "test_data/p11.png",
+		 "test_data/p12.png"
 		 ]
 x_train = np.array([np.array(cv2.imread(fname, 1)) for fname in files])
 # x_train = np.expand_dims(x_train, axis=0)
@@ -43,7 +43,7 @@ data_augmentation = False
 x_train = x_train.astype('float32')
 x_train /= 255
 
-model = load_model("age_reg_model_pal.h5")
+model = load_model("age_regression.h5")
 
 pred = model.predict(x_train)
 print(pred)

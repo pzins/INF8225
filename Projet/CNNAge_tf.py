@@ -15,8 +15,8 @@ import numpy as np
 # Import MNIST data
 from tensorflow.examples.tutorials.mnist import input_data
 # mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-x_set = np.load("xtrain_28_age.dat")
-y_set = np.load("ytrain_28_age.dat")
+x_set = np.load("data/x_28_age.dat")
+y_set = np.load("data/y_28_age.dat")
 x_set = np.squeeze(x_set)
 
 x_test = x_set[3000:4000]
