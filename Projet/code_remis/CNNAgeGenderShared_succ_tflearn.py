@@ -20,9 +20,6 @@ from tflearn.data_augmentation import ImageAugmentation
 from tflearn.objectives import *
 import tensorflow as tf
 
-
-
-
 num_classes_gender = 2
 
 def getAgeCategory(age):  
@@ -51,15 +48,17 @@ y_set = np.column_stack((y_set_age, y_set_gender))
 
 trainSize = int(x_set.shape[0] * 0.7)
 validSize = int(x_set.shape[0] * 0.15)
-
 x_train = x_set[:trainSize]
-y_train = y_set[:trainSize]
+y_train_age = y_set_age[:trainSize]
+y_train_gender = y_set_gender[:trainSize]
 
 x_val = x_set[trainSize:trainSize+validSize]
-y_val = y_set[trainSize:trainSize+validSize]
+y_val_gender = y_set_gender[trainSize:trainSize+validSize]
+y_val_age = y_set_age[trainSize:trainSize+validSize]
 
 x_test = x_set[trainSize+validSize:]
-y_test = y_set[trainSize+validSize:]
+y_test_age = y_set_age[trainSize+validSize:]
+y_test_gender = y_set_gender[trainSize+validSize:]
 
 batch_size = 64
 input_shape = (128, 128, 3)
@@ -86,13 +85,6 @@ img_aug.add_random_flip_leftright()
 img_aug.add_random_rotation(max_angle=5)
 img_aug.add_random_blur (sigma_max=5.0)
 
-def myLoss(prediction, target):
-    a =  mean_square(prediction[0], target[0])
-    print(a.shape)
-    return a
-    return softmax_categorical_crossentropy(prediction[1:3], target[1:3])
-    return 0.8*mean_square(prediction[0], target[0]) + 0.2*softmax_categorical_crossentropy(prediction[1:3], target[1:3])
-
 # Convolutional network building
 network = input_data(shape=input_shape)
                      # data_preprocessing=img_prep,
@@ -103,29 +95,39 @@ network = max_pool_2d(network, 2)
 network = conv_2d(network, 64, 3, activation='relu')
 network = conv_2d(network, 64, 3, activation='relu')
 network = max_pool_2d(network, 2)
-network = dropout(network, 0.75)
-network = fully_connected(network, 128, activation='relu')
-network = dropout(network, 0.5)
-network = fully_connected(network, 3)
-network = regression(network, optimizer='adam',
-                     loss=myLoss,
+
+network_age = fully_connected(network, 128, activation='relu')
+network_age = dropout(network_age, 0.5)
+network_age = fully_connected(network_age, 1)
+network_age = regression(network_age, optimizer='adam',
+                     loss="mean_square",
                      learning_rate=0.001)
 
-model = tflearn.DNN(network, tensorboard_verbose=3)
+network_gender = fully_connected(network, 128, activation='relu')
+network_gender = dropout(network_gender, 0.5)
+network_gender = fully_connected(network_gender, 2)
+network_gender = regression(network_gender, optimizer='adam',
+                     loss=softmax_categorical_crossentropy,
+                     learning_rate=0.001)
+
+model_gender = tflearn.DNN(network_gender, tensorboard_verbose=3)
+model_age = tflearn.DNN(network_age, tensorboard_verbose=3)
 
 # model.load("mymodel.tflearn")
+model_gender.fit(x_train, y_train_gender, n_epoch=20, shuffle=True, validation_set=(x_val, y_val_gender),
+          show_metric=True, batch_size=32, run_id='gender')  
 
-model.fit(x_train, y_train, n_epoch=10, shuffle=True, validation_set=(x_val, y_val),
-          show_metric=True, batch_size=32, run_id='age_reg')  
+model_age.fit(x_train, y_train_age, n_epoch=20, shuffle=True, validation_set=(x_val, y_val_age),
+          show_metric=True, batch_size=32, run_id='age')  
 
 # model.save("mymodel.tflearn")
 
 x_test = x_test[:100]
 x_test = x_test[:100]
 
-e = model.evaluate(x_test, y_test)
+e = model_age.evaluate(x_test, y_test_age)
 print(e)
-p = model.predict(x_test)
+p = model_age.predict(x_test)
 for i in range(len(p)):
-  print(str(p[i]) + " => " + str(y_test[i]))
+  print(str(p[i]) + " => " + str(y_test_age[i]))
 
