@@ -21,4 +21,4 @@ faces.py : script de pré-traitement des données
 wiki.mat : fichier contenant les labels pr chaque image (nom du fichier, année de naissance, date de la photo, genre, ...) (fichier binaire matlab)
 
 
-pour que les scripts fonctionnent ils faut vérifier les chemins pour les données
+pour que les scripts fonctionnent il faut vérifier les chemins pour les données
